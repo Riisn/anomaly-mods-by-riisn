@@ -1,0 +1,129 @@
+-- Mod: Use Cloth Headgear as Bandage (Dummy Item Booster + Smart BHS + Chance Post-Heal)
+
+local valid_cloth_items = {
+    ["helm_bandana"]    = true,
+    ["helm_cloth_mask"] = true,
+    ["helm_rp_bala"]    = true,
+    ["prt_o_fabrics_1"]    = true,
+    ["prt_o_fabrics_2"]    = true,
+    ["prt_o_fabrics_3"]    = true,
+    ["prt_o_fabrics_4"]    = true,
+}
+
+local all_limbs = {"head", "torso", "rightleg", "leftleg", "rightarm", "leftarm"}
+
+local default_maxhp = {
+    head = 11,
+    torso = 11,
+    leftarm = 5,
+    rightarm = 5,
+    leftleg = 5,
+    rightleg = 5,
+}
+
+-------------------------------------------------------------------
+-- Context Menu Action Handlers
+-------------------------------------------------------------------
+
+function menu_bandage_check(obj)
+    if not obj then return false end
+    return valid_cloth_items[obj:section()] or false
+end
+
+function menu_bandage_action(obj)
+    if not obj then return end
+
+    -- 1. Spawn invisible dummy item & force engine consumption (triggers HUD icons & LTX boosters)
+    local se_dummy = alife_create("dummy_cloth_bandage", db.actor:position(), db.actor:level_vertex_id(), db.actor:game_vertex_id(), db.actor:id())
+
+    if se_dummy then
+        CreateTimeEvent("cloth_eat_dummy", "delay_" .. se_dummy.id, 0, function()
+            local dummy_obj = level.object_by_id(se_dummy.id)
+            if dummy_obj then
+                db.actor:eat(dummy_obj)
+                return true
+            end
+            return false
+        end)
+    end
+
+    -- 2. Scan BHS for damaged limbs (< max HP)
+    local target_limb = nil
+
+    if zzz_player_injuries and zzz_player_injuries.health then
+        local wounded_limbs = {}
+        
+        for _, limb_name in ipairs(all_limbs) do
+            local current_hp = zzz_player_injuries.health[limb_name] or 0
+            local max_hp = (zzz_player_injuries.maxhp and zzz_player_injuries.maxhp[limb_name]) 
+                           or default_maxhp[limb_name] 
+                           or 5
+
+            if current_hp < max_hp then
+                table.insert(wounded_limbs, limb_name)
+            end
+        end
+
+        -- Pick randomly ONLY from injured limbs
+        if #wounded_limbs > 0 then
+            target_limb = wounded_limbs[math.random(#wounded_limbs)]
+        else
+            target_limb = all_limbs[math.random(#all_limbs)]
+        end
+    else
+        target_limb = all_limbs[math.random(#all_limbs)]
+    end
+
+    -- 3. Apply BHS limb repair (100% Pre-Heal, 20% Chance Post-Heal)
+    if zzz_player_injuries and target_limb then
+        local max_hp = (zzz_player_injuries.maxhp and zzz_player_injuries.maxhp[target_limb]) 
+                       or default_maxhp[target_limb] 
+                       or 5
+
+        -- Roll for 20% post-heal chance (math.random(100) <= 20)
+        local success_post_heal = (math.random(100) <= 20)
+
+        if zzz_player_injuries.heal_limb then
+            -- 100% Guarantee: 1 Pre-Heal (Yellow HP)
+            zzz_player_injuries.heal_limb(target_limb, 1, false) 
+            
+            -- 20% Chance: 1 Post-Heal (White HP)
+            if success_post_heal then
+                zzz_player_injuries.heal_limb(target_limb, 1, true)
+            end
+        else
+            -- Direct table fallback
+            if zzz_player_injuries.prehealth and zzz_player_injuries.prehealth[target_limb] then
+                zzz_player_injuries.prehealth[target_limb] = math.min(max_hp, zzz_player_injuries.prehealth[target_limb] + 1)
+            end
+            
+            if success_post_heal and zzz_player_injuries.health and zzz_player_injuries.health[target_limb] then
+                zzz_player_injuries.health[target_limb] = math.min(max_hp, zzz_player_injuries.health[target_limb] + 1)
+            end
+        end
+
+        -- Refresh BHS UI
+        if zzz_player_injuries.update_bhs then
+            zzz_player_injuries.update_bhs()
+        elseif zzz_player_injuries.update_ui then
+            zzz_player_injuries.update_ui()
+        end
+    end
+
+    -- 4. Consume the cloth item from inventory
+    alife_release(obj)
+end
+
+-------------------------------------------------------------------
+-- Registering Context Menu
+-------------------------------------------------------------------
+
+function on_game_start()
+    custom_functor_autoinject.add_functor(
+        "cloth_bandage_action",                  
+        menu_bandage_check,                      
+        function() return "Bandage wounds" end,  
+        nil,                                     
+        menu_bandage_action                      
+    )
+end

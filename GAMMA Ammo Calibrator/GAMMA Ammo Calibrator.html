@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S.T.A.L.K.E.R. GAMMA - RIMACOG Ammo Calibrator by Riisn</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔺</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  body{background-color:#241f1b;color:#726136;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:#251e16;}
+  ::-webkit-scrollbar-thumb{background:#2d2921;border-radius:4px;}
+  ::-webkit-scrollbar-thumb:hover{background:#30363d;}
+  .seg{padding:.4rem .5rem;border:1px solid #37291f;border-radius:.5rem;font-size:11px;cursor:pointer;text-align:center;transition:all .12s;background:#0d1117;}
+  .seg.active{border-color:#f97316;color:#fb923c;background:rgba(249,115,22,.08);}
+  .seg .sub{display:block;font-size:9px;color:rgb(184, 154, 120);}
+  .amInput{width:100%;background:#be8a2451;border:1px solid #682c0a;border-radius:4px;padding:2px 4px;text-align:center;color:#e5e7eb;font-size:11px;}
+  .amInput:focus{outline:none;border-color:#f97316;}
+</style>
+</head>
+<body class="p-6 font-sans antialiased text-gray-300">
+<!-- Outer wrapper -->
+<div class="w-full space-y-6 px-4">
+  <header class="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-gray-800 pb-4 gap-4">
+    <div class="text-left">
+      <h1 class="text-2xl font-bold text-white tracking-tight">
+        GAMMA Ammo Calibrator by <a href="https://www.twitch.tv/riisn" target="_blank" rel="noopener noreferrer" class="hover:text-orange-600 transition-colors">Riisn</a>
+      </h1>
+      <p class="text-xs text-gray-400">
+        Faithful GAMMA damage/AP engine · live ammo tuning &amp; export, powered by RIMACOG - <a href="https://www.twitch.tv/riisn" target="_blank" rel="noopener noreferrer" class="hover:text-orange-600 transition-colors">Riisn</a>'s Individual Modifications And Changes Of Gamma
+      </p>
+    </div>
+    <button id="exportBtn" disabled class="px-5 py-2.5 bg-orange-500 hover:bg-orange-400 disabled:bg-gray-800/60 disabled:text-gray-600 font-bold rounded-lg text-xs text-black transition tracking-wider uppercase disabled:cursor-not-allowed">
+      Export Mod (.zip)
+    </button>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto space-y-6">
+    <div id="dropZoneContainer" class="space-y-4">
+      <div id="dropZone" class="relative border border-dashed border-gray-800 hover:border-orange-500/40 bg-orange-800/30 rounded-xl p-8 text-center cursor-pointer transition">
+        <input type="file" id="fileInput" class="hidden" multiple accept=".ltx,.json">
+        <div class="space-y-2 py-4">
+          <div class="text-[26px] font-semibold text-gray-200">Drag &amp; Drop Here</div>
+          <div class="text-xs text-yellow-500">Drop <span class="font-mono text-gray-300">weapon_ammo.ltx + w_ammo_bas.ltx</span>, <span class="font-mono text-gray-300">weapons.json</span>, and <span class="font-mono text-gray-300">npc_armor_profiles.json</span></div>
+          <div class="w-full text-center text-[10px] text-yellow-500 tracking-wide mt-1 font-mono">
+            All files must be dropped in, otherwise it won't work.
+          </div>
+        </div>
+      </div>
+      
+      <!-- Flattened Status Bar -->
+      <div class="border border-gray-800 bg-orange-800/30 rounded-xl p-4 flex flex-wrap gap-y-3 gap-x-4 items-center justify-center text-xs font-mono">
+    
+        <!-- Tooltip: weapon_ammo.ltx -->
+        <div id="chkLtx" class="relative group flex items-center gap-1.5 text-red-500 cursor-help">
+          <span class="text-gray-400 border-b border-dotted border-gray-600 pb-0.5">weapon_ammo.ltx + w_ammo_bas.ltx</span>
+          <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full left-1/2 -translate-x-1/2 mt-2 w-160 bg-yellow-900/90 border border-orange-800 p-3 rounded-lg shadow-xl z-50 pointer-events-none text-left">
+              <div class="font-sans text-xs font-bold text-orange-400 mb-1">weapon_ammo.ltx + w_ammo_bas.ltx</div>
+              <p class="font-sans text-[11px] text-gray-400 mb-2">Contains base parameters like hit_power, k_ap, air_resistance, and pellet counts.</p>
+              <img src="Tips/weapon_ammo location.png" alt="weapon_ammo config example" class="w-full h-auto border border-gray-800 rounded bg-black/40" />
+          </div>
+        </div>
+
+        <!-- Tooltip: weapons.json -->
+        <div id="chkWpn" class="relative group flex items-center gap-1.5 text-red-500 cursor-help">
+           <span class="text-gray-400 border-b border-dotted border-gray-600 pb-0.5">weapons.json</span>
+          <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-yellow-900/90 border border-orange-800 p-3 rounded-lg shadow-xl z-50 pointer-events-none text-left">
+            <div class="font-sans text-xs font-bold text-orange-400 mb-1">weapons.json</div>
+            <p class="font-sans text-[11px] text-gray-400 mb-2">Maps weapons to their specific classes, sniper boosts, and integrated silencer tags.</p>
+            <img src="Tips/weapons.png" alt="weapons.json structure example" class="w-full h-auto border border-gray-800 rounded bg-black/40" />
+          </div>
+        </div>
+
+        <!-- Tooltip: npc_armor_profiles.json -->
+        <div id="chkNpc" class="relative group flex items-center gap-1.5 text-red-500 cursor-help">
+           <span class="text-gray-400 border-b border-dotted border-gray-600 pb-0.5">npc_armor_profiles.json</span>
+          <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-yellow-900/90 border border-orange-800 p-3 rounded-lg shadow-xl z-50 pointer-events-none text-left">
+            <div class="font-sans text-xs font-bold text-orange-400 mb-1">npc_armor_profiles.json</div>
+            <p class="font-sans text-[11px] text-gray-400 mb-2">Defines bone protection values, hit fractions, and scale profiles for targets.</p>
+            <img src="Tips/npc_armor_profiles.png" alt="npc profiles structure example" class="w-full h-auto border border-gray-800 rounded bg-black/40" />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-green-500">✅ <span class="text-gray-400">GBO constants (embedded 1.6.6)</span></div>
+
+        <div class="w-full text-center text-[10px] text-yellow-400/80 tracking-wide mt-1">
+          💡 Hover over each of the files above for a tooltip about the location :)
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+</div>
+  </div>
+
+  <div id="mainDashboard" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start hidden">
+
+    <!-- LEFT -->
+    <div class="lg:col-span-5 border border-gray-800/80 bg-gray-950/40 rounded-xl p-5 space-y-5">
+      <div class="flex border-b border-gray-800 text-xs font-bold tracking-wide uppercase">
+        <button id="tabSingle" class="w-1/2 py-2 text-orange-400 border-b-2 border-orange-500 focus:outline-none">Single Sim</button>
+        <button id="tabDual" class="w-1/2 py-2 text-gray-500 hover:text-gray-300 focus:outline-none">Dual Compare</button>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Interactive Firearm Calibration</h3>
+        <label class="block text-[11px] text-sky-400 font-semibold">Weapon Alpha</label>
+        <select id="weaponSelectA" class="w-full bg-blue-900 border border-blue-400 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-sky-500"></select>
+        <label class="block text-[11px] text-sky-400/80">Caliber Alpha</label>
+        <select id="ammoSelectA" class="w-full bg-blue-900 border border-blue-400 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-sky-500"><option value="">None</option></select>
+        <div id="dualAmmoWrapper" class="hidden space-y-2">
+          <div id="dualWeaponWrapper" class="hidden space-y-2">
+          <label class="block text-[11px] text-amber-400 font-semibold">Weapon Beta</label>
+          <select id="weaponSelectB" class="w-full bg-orange-900 border border-orange-400 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500"></select>
+          </div>
+          <label class="block text-[11px] text-amber-400/80">Caliber Beta</label>
+          <select id="ammoSelectB" class="w-full bg-orange-900 border border-orange-400 rounded-lg p-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500"><option value="">None</option></select>
+        </div>
+      </div>
+
+      <div class="space-y-3 border border-orange-800/80 rounded-xl p-4 bg-zinc-950/70">
+        <h3 class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Target NPC Armor Profile</h3>
+        <select id="profileSelect" class="w-full bg-zinc-900 border border-orange-600/50 rounded-lg p-2 text-xs text-gray-300 focus:outline-none focus:border-orange-500"></select>
+        <div class="grid grid-cols-4 gap-2 text-center text-orange-800 font-mono">
+          <div><div class="text-[9px] text-gray-500 uppercase">Body</div><input id="inBody" type="text" class="amInput font-bold text-white" value="0.1"></div>
+          <div><div class="text-[9px] text-gray-500 uppercase">Head</div><input id="inHead" type="text" class="amInput font-bold text-white" value="0"></div>
+          <div><div class="text-[9px] text-gray-500 uppercase">Hit Frac</div><input id="inHitFrac" type="text" class="amInput font-bold text-white" value="0.5"></div>
+          <div><div class="text-[9px] text-gray-500 uppercase">AP Scale</div><input id="inApScale" type="text" class="amInput font-bold text-white" value="0.8"></div>
+        </div>
+        <p class="text-[9px] text-gray-500">These are editable for what-if tuning; picking a profile changes them to said preset.</p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Hit Zone</div>
+        <div id="hzGroup" class="grid grid-cols-4 gap-2"></div>
+      </div>
+      <div class="space-y-2">
+        <div class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Faction</div>
+        <div id="facGroup" class="grid grid-cols-3 gap-2"></div>
+      </div>
+      <div class="space-y-2">
+        <div class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Difficulty</div>
+        <div id="diffGroup" class="grid grid-cols-3 gap-2"></div>
+      </div>
+
+      <div class="border border-gray-800/80 rounded-xl p-4 bg-gray-950/70 space-y-3">
+        <div class="flex justify-between items-center text-xs"><span class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Engagement Range</span><span id="rangeLabel" class="text-orange-500 font-bold font-mono">0m</span></div>
+        <input id="rangeSlider" type="range" min="0" max="300" value="0" step="5" class="w-full accent-orange-500">
+        <div class="flex justify-between items-center text-xs"><span class="text-[10px] font-bold tracking-wider text-gray-400 uppercase">Barrel Condition</span><span id="barrelLabel" class="text-orange-500 font-bold font-mono">100% (1.00x)</span></div>
+        <input id="barrelSlider" type="range" min="0" max="100" value="100" step="1" class="w-full accent-orange-500">
+        <label class="flex items-center gap-2 pt-1 cursor-pointer"><input id="suppressedCheck" type="checkbox" checked class="rounded bg-gray-900 border-gray-800 text-orange-500 focus:ring-0"><span class="text-xs text-gray-300 select-none">Suppressor Attached <span class="text-orange-400 font-mono text-[11px]">(1.07x)<div class="w-full text-center text-[10px] text-yellow-500 tracking-wide mt-1 font-mono"> Integrally suppressed weapons possess this multiplier inherently.</div></span></span></label>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="border border-gray-800 bg-gray-950 rounded-xl p-3 text-center"><div class="text-[9px] font-bold text-gray-500 uppercase mb-0.5">Effective AP</div><div id="simAp" class="font-mono font-bold text-sm">0</div></div>
+        <div class="border border-gray-800 bg-gray-950 rounded-xl p-3 text-center"><div class="text-[9px] font-bold text-gray-500 uppercase mb-0.5">Velocity Retention</div><div id="simVel" class="font-mono font-bold text-sm">100%</div></div>
+        <div class="col-span-2 border border-gray-800 bg-gray-950 rounded-xl p-4 flex justify-between items-center">
+          <div><div class="text-[10px] font-bold text-gray-500 uppercase mb-0.5">Final Damage (1st hit)</div><div id="simDmg" class="font-mono font-bold text-xl">0.0000</div></div>
+          <div class="text-right"><div class="text-[10px] font-bold text-orange-500 uppercase mb-0.5">Shots To Kill</div><div id="simStk" class="font-mono font-bold text-xl">--</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="lg:col-span-7 border border-gray-800/80 bg-gray-950/20 rounded-xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+        <h2 class="text-sm font-bold text-white tracking-wide uppercase">Ammunition Manifest (editable)</h2>
+        <span id="roundsCount" class="text-[11px] text-gray-500 bg-gray-900 px-2 py-0.5 rounded font-mono">0 rounds</span>
+      </div>
+      <div class="overflow-y-auto max-h-[720px] border border-gray-800 rounded-lg bg-gray-950/40">
+        <table class="w-full border-collapse text-left text-xs font-mono">
+          <thead class="bg-zinc-900/90 text-gray-400 border-b border-amber-800/50 sticky top-0 z-10 text-[15px] uppercase tracking-wider">
+            <tr>
+              <th class="p-3 font-semibold">Ammo ID</th>
+              <th class="p-2 font-semibold text-center relative group cursor-help">
+                <span class="border-b border-dotted border-gray-600">k_hit</span>
+                  <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-yellow-900/95 border border-orange-800 p-3 rounded-lg shadow-xl z-50 pointer-events-none text-left font-normal normal-case">
+                    <div class="font-sans text-xs font-bold text-orange-400 mb-1">Damage Multiplier (k_hit)</div>
+                    <p class="font-sans text-[11px] text-gray-300">Base damage scalar applied directly to the firearm's hit_power parameter.</p>
+                  </div>
+              </th>
+              <th class="p-2 font-semibold text-center relative group cursor-help">
+                <span class="border-b border-dotted border-gray-600">k_ap</span>
+                  <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-yellow-900/95 border border-orange-800 p-3 rounded-lg shadow-xl z-50 pointer-events-none text-left font-normal normal-case">
+                    <div class="font-sans text-xs font-bold text-orange-400 mb-1">Armor Penetration (k_ap)</div>
+                    <p class="font-sans text-[11px] text-gray-300">Raw penetration value determining armor damage degradation and penetration threshold.</p>
+                  </div>
+              </th>
+              <th class="p-2 font-semibold text-center relative group cursor-help">
+                <span class="border-b border-dotted border-gray-600">k_air_res</span>
+                  <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-yellow-900/95 border border-orange-800 p-3 rounded-lg shadow-xl z-50 pointer-events-none text-left font-normal normal-case">
+                    <div class="font-sans text-xs font-bold text-orange-400 mb-1">Air Resistance (k_air_res)</div>
+                    <p class="font-sans text-[11px] text-gray-300">Controls projectile velocity drop-off and ballistic damage decay over distance.</p>
+                  </div>
+              </th>
+              <th class="p-2 font-semibold text-center text-orange-500">Base AP (×10)</th>
+            </tr>
+          </thead>
+          <tbody id="ammoTableBody" class="divide-y divide-gray-900 text-gray-300"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   EMBEDDED GBO CONSTANTS (GAMMA 1.6.6)
+   ============================================================ */
+const GBO = {
+  "difficulty": {"1":1.3,"2":1.05,"3":0.9,"4":0.8},
+  "silencer_boost": 1.07,
+  "integrated_silencer": ["wpn_dvl10_m1","wpn_vssk","wpn_val_tac","wpn_vintorez","wpn_val","wpn_val_modern","wpn_vintorez_m1","wpn_vintorez_m2","wpn_vintorez_isg","wpn_mp5sd","wpn_mp5sd_custom","wpn_mp5sd_new","wpn_amb17"],
+  "snipers": ["wpn_dvl10_m1","wpn_dvl10","wpn_l96a1","wpn_l96a1m","wpn_m98b","wpn_m24","wpn_remington700","wpn_remington700_archangel","wpn_remington700_lapua700","wpn_remington700_magpul_pro","wpn_remington700_mod_x_gen3","wpn_steyr_scout_big","wpn_sv98","wpn_sv98_custom","wpn_k98_mod","wpn_wa2000","wpn_trg","wpn_mosin"],
+  "leg_meta_null_ammo": ["ammo_7.92x33_ap","ammo_7.92x33_fmj","ammo_7.62x54_7h1","ammo_7.62x54_ap","ammo_7.62x54_7h14","ammo_magnum_300","ammo_50_bmg","ammo_gauss"],
+  "buckshot_ammo": ["ammo_12x70_buck","ammo_20x70_buck","ammo_23x75_shrapnel"],
+  "ap_boost": {"legs":0.075,"legs_buckshot":0.013,"head":0.04,"head_buckshot":0.019,"sniper":0.05},
+  "stalker_bone_damage": {"bip01_pelvis":0.9,"bip01_spine":0.9,"bip01_spine1":0.9,"bip01_spine2":0.9,"bip01_neck":2.7,"bip01_head":3.65,"eyelid_1":3.65,"eye_left":3.65,"eye_right":3.65,"jaw_1":3.0,"bip01_l_clavicle":0.7,"bip01_l_upperarm":0.7,"bip01_l_forearm":0.6,"bip01_l_hand":0.4,"bip01_r_clavicle":0.7,"bip01_r_upperarm":0.7,"bip01_r_forearm":0.6,"bip01_r_hand":0.4,"bip01_l_thigh":0.55,"bip01_l_calf":0.45,"bip01_l_foot":0.3,"bip01_r_thigh":0.55,"bip01_r_calf":0.45,"bip01_r_foot":0.3},
+  "stalker_hitzones": {
+    "head":{"default_bone":"bip01_head","group":"head"},
+    "neck":{"default_bone":"bip01_neck","group":"head"},
+    "jaw":{"default_bone":"jaw_1","group":"head"},
+    "torso":{"default_bone":"bip01_spine1","group":"upper_body"},
+    "arms":{"default_bone":"bip01_l_upperarm","group":"upper_body"},
+    "legs":{"default_bone":"bip01_l_thigh","group":"lower_body"}
+  },
+  "stalker_ammo_mult": {"default":1.0,"overrides":{"ammo_7.62x25_p":1.75}},
+  "hp_no_penetration_penalty": {"ammo_357_hp_mag":2,"ammo_9x18_pmm":2,"ammo_9x19_pbp":2,"ammo_7.62x25_p":1.75,"ammo_11.43x23_hydro":2.7,"ammo_5.45x39_ep":1.45,"ammo_5.56x45_ss190":1.33,"ammo_12x76_zhekan":3.5,"ammo_12x76_dart":1.5,"ammo_12x70_buck":3,"ammo_23x75_shrapnel":2,"ammo_23x75_barrikada":3.5,"ammo_20x70_buck":2,"ammo_338_federal":10},
+  "faction_resistance": {
+    "greh":{"dmg_res":0.3,"ap_res":0.9},
+    "zombied":{"dmg_res":0.3,"ap_res":1.0},
+    "isg":{"dmg_res":0.7,"ap_res":0.65},
+    "monolith":{"dmg_res":0.8,"ap_res":0.9},
+    "bandit":{"dmg_res":1.0,"ap_res":1.1}
+  }
+};
+
+// ------------------------------------------------------------
+// LOCALIZATION MAPPING SYSTEM
+// ------------------------------------------------------------
+const G_LOCALIZATION = {
+            // 12.7x55mm
+            "ammo_12.7x55_fmj": "12.7x55mm STs-130",
+            "ammo_12.7x55_ap": "12.7x55mm STs-130 VPS",
+ 
+            // 23x75mm
+            "ammo_23x75_barrikada": "Barrikada 23x75mm",
+            "ammo_23x75_shrapnel": "Shrapnel-25 23x75mm",
+ 
+            // .375
+            "ammo_357_hp_mag": ".357 HP",
+ 
+            // 9x18mm
+            "ammo_9x18_fmj": "9x18mm FMJ",
+            "ammo_9x18_pmm": "9x18mm PMM",
+            "ammo_9x18_ap": "9x18mm AP",
+ 
+            // 9x19mm
+            "ammo_9x19_fmj": "9x19mm FMJ",
+            "ammo_9x19_pbp": "9x19mm PBP",
+            "ammo_9x19_ap": "9x19mm AP",
+
+            // 9x21mm
+            "ammo_9x21_sp10": "9x21 SP10",
+ 
+            // 9x39mm
+            "ammo_9x39_pab9": "9x39mm SP-5",
+            "ammo_9x39_ap": "9x39mm SP-6",
+ 
+            // .45 ACP
+            "ammo_11.43x23_hydro": ".45 ACP Hydra-Shock HP",
+            "ammo_11.43x23_fmj": ".45 ACP FMJ",
+ 
+            // 7.62x25mm Tokarev
+            "ammo_7.62x25_p": "7.62x25mm LRNPC",
+            "ammo_7.62x25_ps": "7.62x25mm Pst",
+ 
+            // 4.6x30mm
+            "ammo_4.6x30_fmj": "4.6x30mm FMJ",
+ 
+            // 5.7x28mm
+            "ammo_5.7x28_ss190": "5.7x28mm SS190",
+            "ammo_5.7x28_ss195": "5.7x28mm SS195",
+ 
+            // 5.45x39mm
+            "ammo_5.45x39_fmj": "5.45x39mm FMJ",
+            "ammo_5.45x39_ep": "5.45x39mm HP",
+            "ammo_5.45x39_ap": "5.45x39mm AP",
+            "ammo_5.45x39_7n22": "5.45x39mm 7N22",
+ 
+            // 5.56x45mm
+            "ammo_5.56x45_fmj": "5.56x45mm FMJ",
+            "ammo_5.56x45_ss190": "5.56x45mm HP",
+            "ammo_5.56x45_ap": "5.56x45mm AP",
+ 
+            // 7.62x39mm
+            "ammo_7.62x39_fmj": "7.62x39mm FMJ",
+            "ammo_7.62x39_ap": "7.62x39mm M43",
+ 
+            // 7.62x51mm NATO
+            "ammo_7.62x51_fmj": "7.62x51mm NATO ball",
+            "ammo_7.62x51_ap": "7.62x51mm NATO AP",
+ 
+            // 7.62x54mmR
+            "ammo_7.62x54_7h1": "7.62x54mmR 7N1",
+            "ammo_7.62x54_7h14": "7.62x54mmR 7N14",
+            "ammo_7.62x54_ap": "7.62x54mmR AP",
+            "ammo_pkm_100": "7.62x54mmR PP (PKM)",
+ 
+            // 7.92x57mm
+            "ammo_7.92x57_fmj": "7.92x57mm HP",
+            "ammo_7.92x57_ap": "7.92x57mm AP",
+ 
+            // .338 Lapua Magnum
+            "ammo_338_federal": ".338 Federal",
+            "ammo_magnum_300": ".338 Lapua Magnum",
+ 
+            // 12x70, 12x76 and 20x70 Shotgun Calibers
+            "ammo_12x70_buck": "12x70 Buckshot",
+            "ammo_12x76_bull": "12x76 Bull",
+            "ammo_12x76_zhekan": "12x76 Slugs",
+            "ammo_12x76_dart": "12x76 Dart AP",
+            "ammo_12x70_buck_self": "12x70 Home-made",
+            "ammo_20x70_buck": "12x70 Buck",
+ 
+            // Gauss / Unknown
+            "ammo_gauss": "Gauss Batteries",
+            "ammo_50_bmg": ".50 BMG",
+
+            // Armors and Helmets
+            "stalker_outfit": "'Sunrise' Stalker Suit",
+            "army_outfit": "Skat-9 Armored Suit",
+            "helm_tactic": "ACH-7 Headgear Set",
+            "cs_novice_outfit": "Clear Sky Novice Outfit",
+            "helm_ach7ex": "ACH-7EX Headgear Set",
+            "cs_light_novice_outfit": "Clear Sky Light Novice Outfit",
+            "helm_respirator_gp5": "GP-5 Gas Mask",
+            "cs_light_outfit": "Clear Sky Light Outfit",
+            "exo_outfit": "Exoskeleton",
+            "helm_exo": "ExoHelmet",
+            "hybrid_outfit": "Hybrid Armored Suit",
+            "bandit_exo_outfit": "Stolen Exoskeleton",
+            "helm_spartan": "Cz-M10 Spartan Helmet",
+            "svoboda_exo_outfit": "Paragon of Freedom"
+        
+};
+
+function translateItem(key) {
+    if (!key) return "";
+    return G_LOCALIZATION[key] || key;
+}
+
+/* ============================================================
+   ENGINE (faithful port of damage-calc S / C / T / D)
+   ============================================================ */
+const stripCond = id => id.replace(/_(?:very)?bad$/,'');
+function barrelCorr(cond){const t=cond/100;return Math.min((130-1.12*t)*(t*1.12)/100,1);}
+function airResDiv(dist,kAir){return 1+(dist/200)*((kAir*0.5)/(1-kAir+0.1));}
+const isBuckshot = id => GBO.buckshot_ammo.includes(stripCond(id));
+const isSniper   = wid => GBO.snipers.includes(wid);
+const isIntegrated = wid => GBO.integrated_silencer.includes(wid);
+const silActive  = (sup,wid) => !!sup || isIntegrated(wid);
+function boneDmgMult(hz){const z=GBO.stalker_hitzones[hz];if(!z)return 0.75;return GBO.stalker_bone_damage[z.default_bone]||0.75;}
+function factionRes(f){return GBO.faction_resistance[f]||{dmg_res:1,ap_res:1};}
+function stalkerAmmoMult(id){const r=stripCond(id),o=GBO.stalker_ammo_mult.overrides;return o[r]===undefined?GBO.stalker_ammo_mult.default:o[r];}
+function hpNoPen(id){return GBO.hp_no_penetration_penalty[stripCond(id)]||1;}
+const zoneIsHead = hz => (hz==='head'||hz==='neck'||hz==='jaw');
+
+function calcAP(p){
+  const stripped=stripCond(p.ammoId);
+  let ap=p.kAp*10;
+  const z=GBO.stalker_hitzones[p.hitzone]; const grp=z?z.group:'upper_body';
+  const buck=isBuckshot(p.ammoId);
+  const legNull=GBO.leg_meta_null_ammo.includes(stripped);
+  if(grp==='lower_body'){
+    if(buck) ap+=GBO.ap_boost.legs_buckshot;
+    else if(!legNull && !isSniper(p.weaponId)) ap+=GBO.ap_boost.legs;
+  }
+  if(grp==='head') ap+= buck?GBO.ap_boost.head_buckshot:GBO.ap_boost.head;
+  if(isSniper(p.weaponId)) ap+=GBO.ap_boost.sniper;
+  ap = ap * p.apScale * barrelCorr(p.barrelCond);
+  const div=airResDiv(p.distance,p.kAirRes);
+  const fac=factionRes(p.faction);
+  const sil=silActive(p.suppressed,p.weaponId)?GBO.silencer_boost:1;
+  return ap/div*fac.ap_res*sil*p.diffMult*0.8;
+}
+function calcRawDmg(p){
+  const div=airResDiv(p.distance,p.kAirRes);
+  const barrel=barrelCorr(p.barrelCond);
+  const bone=boneDmgMult(p.hitzone);
+  const fac=factionRes(p.faction);
+  const ammoMult=stalkerAmmoMult(p.ammoId);
+  const sil=silActive(p.suppressed,p.weaponId)?GBO.silencer_boost:1;
+  return p.hitPower/div*p.kHit*bone*p.apScale*1.1*barrel*fac.dmg_res*p.diffMult*ammoMult*sil*p.pellets;
+}
+function shotResult(ap,dmg,armor,hitFrac,cond){
+  const a=armor-ap*0.6;
+  if(ap>=armor) return {penetrated:true,partialPen:false,damage:dmg,newArmor:armor};
+  if(ap>a)      return {penetrated:false,partialPen:true,damage:dmg*hitFrac,newArmor:a};
+  return {penetrated:false,partialPen:false,
+    damage:0.0025*dmg*hitFrac*62.5/cond,
+    minDamage:0.0025*dmg*hitFrac*25/cond,
+    maxDamage:0.0025*dmg*hitFrac*100/cond,newArmor:a};
+}
+function simulateSTK(ap,rawDmg,startArmor,hitFrac,cond){
+  let armor=startArmor,hp=1,shots=0,blunt=false;
+  while(hp>0 && shots<200){
+    shots++; const r=shotResult(ap,rawDmg,armor,hitFrac,cond);
+    armor=r.newArmor; hp-=r.damage; if(r.minDamage!==undefined) blunt=true;
+    if(hp<=0) break;
+  }
+  let minStk=shots,maxStk=shots;
+  if(blunt){
+    let e=1,n=startArmor,v=0;
+    while(e>0&&v<200){v++;const t=shotResult(ap,rawDmg,n,hitFrac,cond);n=t.newArmor;e-=(t.maxDamage===undefined?t.damage:t.maxDamage);}
+    minStk=v;
+    e=1;n=startArmor;let y=0;
+    while(e>0&&y<200){y++;const t=shotResult(ap,rawDmg,n,hitFrac,cond);n=t.newArmor;e-=(t.minDamage===undefined?t.damage:t.minDamage);}
+    maxStk=y;
+  }
+  return {stk:shots,minStk,maxStk};
+}
+
+/* ============================================================
+   STATE + DATA
+   ============================================================ */
+let G_AMMO=null, G_AMMO_ORDER=[], G_WEAPONS=null, G_PROFILES=null, G_PROFILES_UNIQUE=[];
+let activeTab="single";
+const state={hitzone:"torso",faction:"default",diffMult:"0.9"};
+
+const HITZONES=[["head","Head",3.65],["torso","Torso",0.9],["arms","Arms",0.7],["legs","Legs",0.55]];
+const FACTIONS=[["default","Other"],["greh","Sin"],["zombied","Zombified"],["isg","ISG"],["monolith","Monolith"],["bandit","Bandit"]];
+const DIFFS=[["Rookie",1.3],["Stalker",1.05],["Veteran",0.9]];
+
+/* ---- LTX parsing with inheritance ---- */
+function parseLtx(text){
+  const map={}, order=[]; let cur=null;
+  text.split(/\r?\n/).forEach(raw=>{
+    let line=raw.split(';')[0].trim();
+    if(!line) return;
+    const sec=line.match(/^\[([^\]]+)\]\s*(?::\s*(.*))?$/);
+    if(sec){
+      const id=sec[1].trim();
+      const parents=sec[2]?sec[2].split(',').map(s=>s.trim()).filter(Boolean):[];
+      cur=id;
+      if(!map[id]){map[id]={id,parents,own:new Map()};order.push(id);}
+      else map[id].parents=parents;
+      return;
+    }
+    if(cur && line.includes('=')){
+      const i=line.indexOf('=');
+      map[cur].own.set(line.slice(0,i).trim(), line.slice(i+1).trim());
+    }
+  });
+  return {map,order};
+}
+function resolvedField(id,key,seen){
+  seen=seen||new Set();
+  const a=G_AMMO[id]; if(!a||seen.has(id)) return undefined; seen.add(id);
+  if(a.own.has(key)) return a.own.get(key);
+  for(const p of a.parents){const v=resolvedField(p,key,seen); if(v!==undefined) return v;}
+  return undefined;
+}
+
+/* ============================================================
+   FILE HANDLING
+   ============================================================ */
+document.addEventListener("DOMContentLoaded",()=>{
+  const dz=document.getElementById("dropZone"), fi=document.getElementById("fileInput");
+  dz.addEventListener("click",()=>fi.click());
+  dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("border-orange-500/50");});
+  dz.addEventListener("dragleave",()=>dz.classList.remove("border-orange-500/50"));
+  dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("border-orange-500/50");handleFiles(e.dataTransfer.files);});
+  fi.addEventListener("change",e=>handleFiles(e.target.files));
+
+  document.getElementById("tabSingle").addEventListener("click",()=>switchTab("single"));
+  document.getElementById("tabDual").addEventListener("click",()=>switchTab("dual"));
+  document.getElementById("weaponSelectA").addEventListener("change",e=>{fillAmmo("ammoSelectA",e.target.value);recompute();});
+  document.getElementById("weaponSelectB").addEventListener("change",e=>{fillAmmo("ammoSelectB",e.target.value);recompute();});
+  ["ammoSelectA","ammoSelectB","profileSelect","inBody","inHead","inHitFrac","inApScale","suppressedCheck"].forEach(id=>{
+    document.getElementById(id).addEventListener("change",()=>{if(id==="profileSelect")applyProfile();recompute();});
+    document.getElementById(id).addEventListener("input",recompute);
+  });
+  const rs=document.getElementById("rangeSlider");
+  rs.addEventListener("input",e=>{document.getElementById("rangeLabel").innerText=e.target.value+"m";recompute();});
+  const bs=document.getElementById("barrelSlider");
+  bs.addEventListener("input",e=>{document.getElementById("barrelLabel").innerText=`${e.target.value}% (${barrelCorr(+e.target.value).toFixed(2)}x)`;recompute();});
+  document.getElementById("exportBtn").addEventListener("click",exportZip);
+
+  buildSegs();
+});
+
+function handleFiles(files){
+  Array.from(files).forEach(file=>{
+    const r=new FileReader(), name=file.name.toLowerCase();
+    
+    if(name === 'weapon_ammo.ltx'){
+      r.onload=e=>{
+        const p=parseLtx(e.target.result);
+        G_AMMO_BASE = p;
+        checkLtxStatus();
+      };
+      r.readAsText(file);
+    } else if(name === 'w_ammo_bas.ltx'){
+      r.onload=e=>{
+        const p=parseLtx(e.target.result);
+        G_AMMO_BAS = p;
+        checkLtxStatus();
+      };
+      r.readAsText(file);
+    } else if(name.endsWith('.json')){
+      r.onload=e=>{
+        let data; try{data=JSON.parse(e.target.result);}catch(err){alert("Bad JSON: "+file.name);return;}
+        const arr=Array.isArray(data)?data:[];
+        const sniffNpc = arr.length && arr[0] && arr[0].body_bonearmor!==undefined;
+        const sniffWpn = arr.length && arr[0] && (arr[0]["Hit Power"]!==undefined || arr[0].Ammo!==undefined || arr[0].ID!==undefined && arr[0].Type!==undefined);
+        if(name.includes("npc")||name.includes("armor")||name.includes("profile")||(sniffNpc&&!name.includes("weapon"))){
+          G_PROFILES=arr; buildProfiles(); mark("chkNpc");
+        } else if(name.includes("weapon")||sniffWpn){
+          G_WEAPONS={}; arr.forEach(w=>{if(w.ID)G_WEAPONS[w.ID]=w;}); mark("chkWpn");
+        } else if(sniffNpc){ G_PROFILES=arr; buildProfiles(); mark("chkNpc"); }
+        else { G_WEAPONS={}; arr.forEach(w=>{if(w.ID)G_WEAPONS[w.ID]=w;}); mark("chkWpn"); }
+        verify();
+      };
+      r.readAsText(file);
+    }
+  });
+}
+
+function checkLtxStatus() {
+  // Only proceed once BOTH LTX files are loaded into memory
+  if (G_AMMO_BASE && G_AMMO_BAS) {
+
+    // Start with a deep copy of the w_ammo_bas items
+    const mergedMap = {};
+    const mergedOrder = [...G_AMMO_BAS.order];
+
+    // Copy all BAS entries first
+    for (const [id, data] of Object.entries(G_AMMO_BAS.map)) {
+      mergedMap[id] = {
+        parents: [...data.parents],
+        own: new Map(data.own) // clone the Map so we don't pollute originals
+      };
+    }
+
+    // Overwrite / Inject entries from weapon_ammo.ltx (Priority File)
+    for (const [id, baseData] of Object.entries(G_AMMO_BASE.map)) {
+      if (mergedMap[id]) {
+        // --- OVERWRITE CASE (e.g., 23x75 ammo exists in both) ---
+        // weapon_ammo.ltx values OVERRULE the w_ammo_bas.ltx values
+        baseData.own.forEach((val, key) => {
+          mergedMap[id].own.set(key, val);
+        });
+
+        // Merge parents if any new ones exist in weapon_ammo.ltx
+        baseData.parents.forEach(p => {
+          if (!mergedMap[id].parents.includes(p)) {
+            mergedMap[id].parents.push(p);
+          }
+        });
+      } else {
+        // --- NEW ENTRY CASE ---
+        // If it only exists in weapon_ammo.ltx, add it normally
+        mergedMap[id] = {
+          parents: [...baseData.parents],
+          own: new Map(baseData.own)
+        };
+      }
+
+      // Ensure weapon_ammo order ID is preserved
+      if (!mergedOrder.includes(id)) {
+        mergedOrder.push(id);
+      }
+    }
+    G_AMMO = mergedMap;
+    G_AMMO_ORDER = mergedOrder;
+    mark("chkLtx");
+    verify();
+  }
+}
+
+function verify(){
+  // The dashboard will locked until all 4 assets are ready
+  if(G_AMMO && G_WEAPONS && G_PROFILES){
+    document.getElementById("dropZoneContainer").classList.add("hidden");
+    document.getElementById("mainDashboard").classList.remove("hidden");
+    document.getElementById("exportBtn").removeAttribute("disabled");
+    populateWeapons(); populateProfiles(); buildManifest(); applyProfile(); recompute();
+  }
+}
+function mark(id){const el=document.getElementById(id);el.classList.remove("text-red-500");el.classList.add("text-green-500");el.innerHTML="✅ "+el.innerHTML.slice(2);}
+function verify(){
+  if(G_AMMO&&G_WEAPONS&&G_PROFILES){
+    document.getElementById("dropZoneContainer").classList.add("hidden");
+    document.getElementById("mainDashboard").classList.remove("hidden");
+    document.getElementById("exportBtn").removeAttribute("disabled");
+    populateWeapons(); populateProfiles(); buildManifest(); applyProfile(); recompute();
+  }
+}
+
+/* ============================================================
+   UI BUILDERS
+   ============================================================ */
+function buildSegs(){
+  const hz=document.getElementById("hzGroup");
+  HITZONES.forEach(([k,lbl,m])=>{
+    const b=document.createElement("div"); b.className="seg"+(k===state.hitzone?" active":"");
+    b.innerHTML=`${lbl}<span class="sub">${m}x</span>`;
+    b.onclick=()=>{state.hitzone=k;[...hz.children].forEach(c=>c.classList.remove("active"));b.classList.add("active");recompute();};
+    hz.appendChild(b);
+  });
+  const fac=document.getElementById("facGroup");
+  FACTIONS.forEach(([k,lbl])=>{
+    const fr=factionRes(k);
+    const b=document.createElement("div"); b.className="seg"+(k===state.faction?" active":"");
+    b.innerHTML=`${lbl}<span class="sub">${fr.dmg_res}x / ${fr.ap_res}AP</span>`;
+    b.onclick=()=>{state.faction=k;[...fac.children].forEach(c=>c.classList.remove("active"));b.classList.add("active");recompute();};
+    fac.appendChild(b);
+  });
+  const df=document.getElementById("diffGroup");
+  DIFFS.forEach(([lbl,m])=>{
+    const b=document.createElement("div"); b.className="seg"+(m===parseFloat(state.diffMult)?" active":"");
+    b.innerHTML=`${lbl}<span class="sub">${m}x</span>`;
+    b.onclick=()=>{state.diffMult=m;[...df.children].forEach(c=>c.classList.remove("active"));b.classList.add("active");recompute();};
+    df.appendChild(b);
+  });
+}
+function switchTab(t){
+  activeTab=t;
+  const S=document.getElementById("tabSingle"),D=document.getElementById("tabDual");
+  const on="w-1/2 py-2 text-orange-400 border-b-2 border-orange-500 focus:outline-none";
+  const off="w-1/2 py-2 text-gray-500 hover:text-gray-300 focus:outline-none";
+  S.className=t==="single"?on:off; D.className=t==="dual"?on:off;
+  document.getElementById("dualWeaponWrapper").classList.toggle("hidden",t!=="dual");
+  document.getElementById("dualAmmoWrapper").classList.toggle("hidden",t!=="dual");
+  recompute();
+}
+function populateWeapons(){
+  const a=document.getElementById("weaponSelectA"),b=document.getElementById("weaponSelectB");
+  a.innerHTML='<option value="">Select Weapon...</option>'; b.innerHTML='<option value="">Select Weapon...</option>';
+  Object.values(G_WEAPONS).sort((x,y)=>(x.Name||x.ID).localeCompare(y.Name||y.ID,undefined,{numeric:true})).forEach(w=>{
+    const o=`<option value="${w.ID}">${w.Name||w.ID}</option>`; a.innerHTML+=o; b.innerHTML+=o;
+  });
+}
+function ammoTokensForWeapon(w){
+  const combined=`${w.Ammo||""};${w["Alt. ammo"]||""}`;
+  return combined.split(';').map(s=>s.trim()).filter(Boolean);
+}
+function resolveAmmoId(token){
+  const cands=[token, token.replace(/-/g,'_'), token.replace(/_/g,'-')];
+  for(const c of cands) if(G_AMMO[c]) return c;
+  return null;
+}
+function fillAmmo(selId,weaponId){
+  const sel=document.getElementById(selId);
+  sel.innerHTML='<option value="">-- Choose Ammo --</option>';
+  const w=G_WEAPONS[weaponId]; if(!w) return;
+  ammoTokensForWeapon(w).forEach(tok=>{
+    const id=resolveAmmoId(tok); if(!id) return;
+    
+    // 1. Get the raw inv_name from LTX if it exists
+    const rawInvName = resolvedField(id, 'inv_name');
+    // 2. Try translating the inv_name string first. If it returns the same raw key, 
+    //    or if it doesn't exist, translate using the section ID directly.
+    let displayName = translateItem(rawInvName);
+    if (!rawInvName || displayName === rawInvName) {
+      displayName = translateItem(id);
+    }
+
+    sel.innerHTML+=`<option value="${id}">${displayName} · ${id}</option>`;
+  });
+}
+function buildProfiles(){
+  const m=new Map();
+  G_PROFILES.forEach(p=>{
+    if(p.body_bonearmor===undefined) return;
+    const key=`${p.visual_item_id||''}|${p.body_bonearmor}|${p.head_bonearmor}|${p.hit_fraction}|${p.ap_scale}`;
+    if(!m.has(key)) m.set(key,p);
+  });
+  G_PROFILES_UNIQUE=[...m.values()].sort((a,b)=>profileLabel(a).localeCompare(profileLabel(b)));
+}
+function profileLabel(p){
+  const base=p.visual_item_id?p.visual_item_id.split(',').map(s=>translateItem(s.trim())).join(' + '):'(bare flesh)';
+  return `${base}  ·  B${p.body_bonearmor} H${p.head_bonearmor} HF${p.hit_fraction} AP${p.ap_scale}`;
+}
+function populateProfiles(){
+  const sel=document.getElementById("profileSelect"); sel.innerHTML="";
+  G_PROFILES_UNIQUE.forEach((p,i)=>{ sel.innerHTML+=`<option value="${i}">${profileLabel(p)}</option>`; });
+  // default to a plain stalker_outfit if present
+  const def=G_PROFILES_UNIQUE.findIndex(p=>p.visual_item_id==="stalker_outfit");
+  if(def>=0) sel.value=def;
+}
+function applyProfile(){
+  const p=G_PROFILES_UNIQUE[+document.getElementById("profileSelect").value];
+  if(!p) return;
+  document.getElementById("inBody").value=p.body_bonearmor;
+  document.getElementById("inHead").value=p.head_bonearmor;
+  document.getElementById("inHitFrac").value=p.hit_fraction;
+  document.getElementById("inApScale").value=p.ap_scale;
+}
+function buildManifest(){
+  const tb=document.getElementById("ammoTableBody"); tb.innerHTML="";
+  const blacklist = [
+  '_(?:very)?bad$',     // Matches _bad and _verybad variants
+  'zhekan_heli',
+  '7\\.92x33',
+  'batteries',
+  'm209',
+  'og-',
+  'battery',
+  'knife',
+  'binoc',
+  '_cardan',
+  '_dyno',
+  '_base',
+  '_eco'
+];
+
+const ids = G_AMMO_ORDER.filter(id => {
+  const isAmmo = id.toLowerCase().startsWith("ammo");
+  const isBlacklisted = blacklist.some(pattern => new RegExp(pattern, "i").test(id));
+  return isAmmo && !isBlacklisted;
+});
+  document.getElementById("roundsCount").innerText=`${ids.length} rounds`;
+  ids.sort().forEach(id=>{
+    const kHit=resolvedField(id,'k_hit')??"", kAp=resolvedField(id,'k_ap')??"", kAir=resolvedField(id,'k_air_resistance')??"";
+    const tr=document.createElement("tr"); tr.className="hover:bg-gray-900/40";
+    
+    // 1. Get the raw inv_name from LTX if it exists
+    const rawInvName = resolvedField(id, 'inv_name');
+    // 2. Try translating the inv_name string first. If it returns the same raw key, 
+    //    or if it doesn't exist, translate using the section ID directly.
+    let displayName = translateItem(rawInvName);
+    if (!rawInvName || displayName === rawInvName) {
+      displayName = translateItem(id);
+    }
+
+    tr.innerHTML = `
+      <td class="p-2 text-gray-100"><div>${displayName}</div><div class="text-[10px] text-gray-500">${id}</div></td>
+      <td class="p-2 text-center"><input class="amInput" data-id="${id}" data-key="k_hit" value="${kHit}"></td>
+      <td class="p-2 text-center"><input class="amInput" data-id="${id}" data-key="k_ap" value="${kAp}"></td>
+      <td class="p-2 text-center"><input class="amInput" data-id="${id}" data-key="k_air_resistance" value="${kAir}"></td>
+      <td class="p-2 text-center font-bold text-orange-400" id="ap_${cssId(id)}">${kAp!==""?(parseFloat(kAp)*10).toFixed(3):"--"}</td>`;
+    tb.appendChild(tr);
+  });
+  tb.querySelectorAll("input.amInput").forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const id=inp.dataset.id, key=inp.dataset.key, val=inp.value.trim();
+      G_AMMO[id].own.set(key,val);
+      if(key==="k_ap"){const cell=document.getElementById("ap_"+cssId(id)); if(cell) cell.innerText=val!==""&&!isNaN(parseFloat(val))?(parseFloat(val)*10).toFixed(3):"--";}
+      recompute();
+    });
+  });
+}
+const cssId = id => id.replace(/[^a-zA-Z0-9_-]/g,'_');
+
+/* ============================================================
+   SLOT CALC + RENDER
+   ============================================================ */
+function opts(){
+  return {
+    hitzone:state.hitzone, faction:state.faction, diffMult:state.diffMult,
+    distance:+document.getElementById("rangeSlider").value,
+    barrelCond:+document.getElementById("barrelSlider").value,
+    suppressed:document.getElementById("suppressedCheck").checked,
+    body:parseFloat(document.getElementById("inBody").value)||0,
+    head:parseFloat(document.getElementById("inHead").value)||0,
+    hitFrac:parseFloat(document.getElementById("inHitFrac").value)||0,
+    apScale:parseFloat(document.getElementById("inApScale").value)||0
+  };
+}
+function computeSlot(weaponId,ammoId,o){
+  const w=G_WEAPONS[weaponId], a=G_AMMO[ammoId];
+  if(!w||!a) return null;
+  const hitPower=parseFloat(w["Hit Power"]||w["hit_power"]);
+  const kHit=parseFloat(resolvedField(ammoId,'k_hit'));
+  const kAp=parseFloat(resolvedField(ammoId,'k_ap'));
+  const kAir=parseFloat(resolvedField(ammoId,'k_air_resistance'))||0;
+  const pellets=parseInt(resolvedField(ammoId,'buck_shot'))||1;
+  if(isNaN(hitPower)||isNaN(kHit)||isNaN(kAp)) return null;
+  const isHead=zoneIsHead(o.hitzone);
+  const startArmor=isHead?o.head:o.body;
+  const cond=hpNoPen(ammoId);
+  const common={kAp,kHit,pellets,kAirRes:kAir,distance:o.distance,barrelCond:o.barrelCond,diffMult:o.diffMult,apScale:o.apScale,ammoId,weaponId,hitzone:o.hitzone,faction:o.faction,suppressed:o.suppressed,hitPower};
+  const ap=calcAP(common), rawDmg=calcRawDmg(common);
+  const first=shotResult(ap,rawDmg,startArmor,o.hitFrac,cond);
+  const stk=simulateSTK(ap,rawDmg,startArmor,o.hitFrac,cond);
+  return {ap,rawDmg,finalDmg:first.damage,penetrated:first.penetrated,partialPen:first.partialPen,startArmor,stk,vel:1/airResDiv(o.distance,kAir)};
+}
+const fmt=(x,d=4)=>(x==null||isNaN(x))?"—":(Math.abs(x)<1e-4?"0":x.toFixed(d));
+function stkText(s){ if(!s)return "--"; return s.minStk===s.maxStk?`${s.stk}`:`${s.stk} (${s.minStk}\u2013${s.maxStk})`; }
+function penTag(r){ if(!r)return ""; if(r.penetrated)return '<span class="text-green-400">✔pen</span>'; if(r.partialPen)return '<span class="text-yellow-400">~partial</span>'; return '<span class="text-red-400">✖blunt</span>'; }
+
+function recompute(){
+  if(!(G_AMMO&&G_WEAPONS&&G_PROFILES)) return;
+  const o=opts();
+  const A=computeSlot(document.getElementById("weaponSelectA").value,document.getElementById("ammoSelectA").value,o);
+  const B=activeTab==="dual"?computeSlot(document.getElementById("weaponSelectB").value,document.getElementById("ammoSelectB").value,o):null;
+  const vsArmor=zoneIsHead(o.hitzone)?o.head:o.body;
+  const simAp=document.getElementById("simAp"),simVel=document.getElementById("simVel"),simDmg=document.getElementById("simDmg"),simStk=document.getElementById("simStk");
+  if(activeTab==="single"||!B){
+    simAp.innerHTML=A?`<span class="text-sky-400">${fmt(A.ap)}</span> <span class="text-gray-500 text-[10px]">vs ${fmt(vsArmor)}</span> ${penTag(A)}`:"0";
+    simVel.innerHTML=A?`<span class="text-sky-400">${(A.vel*100).toFixed(1)}%</span>`:"100%";
+    simDmg.innerHTML=A?`<span class="text-sky-400">${fmt(A.finalDmg)}</span>`:"0.0000";
+    simStk.innerHTML=A?`<span class="text-sky-400">${stkText(A.stk)}</span>`:"--";
+  } else {
+    simAp.innerHTML=`<span class="text-sky-400">${A?fmt(A.ap):"—"}</span> <span class="text-gray-600">|</span> <span class="text-amber-400">${B?fmt(B.ap):"—"}</span> <span class="text-gray-500 text-[10px]">vs ${fmt(vsArmor)}</span>`;
+    simVel.innerHTML=`<span class="text-sky-400">${A?(A.vel*100).toFixed(1):"—"}%</span> <span class="text-gray-600">|</span> <span class="text-amber-400">${B?(B.vel*100).toFixed(1):"—"}%</span>`;
+    simDmg.innerHTML=`<span class="text-sky-400">${A?fmt(A.finalDmg):"—"}</span> <span class="text-gray-600 text-sm">/</span> <span class="text-amber-400">${B?fmt(B.finalDmg):"—"}</span>`;
+    simStk.innerHTML=`<span class="text-sky-400">${A?stkText(A.stk):"—"}</span> <span class="text-red-600 text-sm">vs</span> <span class="text-amber-400">${B?stkText(B.stk):"—"}</span>`;
+  }
+}
+
+/* ============================================================
+   EXPORT (reconstruct LTX preserving inheritance + edits)
+   ============================================================ */
+function exportZip(){
+  if(!G_AMMO || !G_AMMO_BASE || !G_AMMO_BAS) return;
+  
+  let outBase="; Generated via GAMMA Ammo Calibrator by Riisn (Base Ammo Config)\n\n";
+  let outBas="; Generated via GAMMA Ammo Calibrator by Riisn (B&S Ammo Config)\n\n";
+  
+  // Reconstruct weapon_ammo.ltx
+  G_AMMO_BASE.order.forEach(id=>{
+    const a=G_AMMO[id]; if(!a) return;
+    outBase+= a.parents.length ? `[${id}]:${a.parents.join(", ")}\n` : `[${id}]\n`;
+    a.own.forEach((v,k)=>{ outBase+=`${k} = ${v}\n`; });
+    outBase+="\n";
+  });
+  
+  // Reconstruct w_ammo_bas.ltx
+  G_AMMO_BAS.order.forEach(id=>{
+    const a=G_AMMO[id]; if(!a) return;
+    outBas+= a.parents.length ? `[${id}]:${a.parents.join(", ")}\n` : `[${id}]\n`;
+    a.own.forEach((v,k)=>{ outBas+=`${k} = ${v}\n`; });
+    outBas+="\n";
+  });
+  
+  const zip=new JSZip();
+  zip.file("gamedata/configs/items/weapons/weapon_ammo.ltx", outBase);
+  zip.file("gamedata/configs/items/weapons/w_ammo_bas.ltx", outBas);
+  
+  zip.generateAsync({type:"blob"}).then(blob=>{
+    const link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
+    link.download="Riisns_GAMMA_Ammo_Calibrator_Mod.zip";
+    link.click();
+  });
+}
+</script>
+<footer class="mt-auto w-full w-full mx-auto px-6 pt-8 pb-4">
+  <div class="border-t border-gray-800/80 pt-4 flex items-center gap-2 text-xs text-gray-500 font-sans">
+    <span>
+      Inspired by <a href="https://stalker-gamma-db.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-amber-500 transition-colors">S.T.A.L.K.E.R. G.A.M.M.A. DB</a>, <a href="https://www.twitch.tv/eroktic" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-yellow-500 transition-colors">Eroktic</a> and <a href="https://discord.com/channels/165760496719495169/1522563738018779186" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-purple-300 transition-colors">his mod</a>. Special thanks to <a href="https://www.stalkergamma.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-green-400 transition-colors">Grok</a> and the entire modding community.
+    </span>
+  </div>
+</footer>
+</body>
+</html>
