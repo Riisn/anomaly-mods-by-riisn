@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+
+<!--
+	P.A.C.K.
+-->
+
+<string_table>
+	<string id="st_cloth_mask_healing">
+		<text>Ripped material to use as a bandage</text>
+	</string>
+</string_table>

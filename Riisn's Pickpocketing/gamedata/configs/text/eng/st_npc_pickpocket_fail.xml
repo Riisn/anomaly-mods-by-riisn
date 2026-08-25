@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+
+	<string id="st_npc_pickpocket_fail_warn_1">
+		<text>Keep those hands to yourself, buddy.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_2">
+		<text>Try that again and you won't like what happens.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_3">
+		<text>What do you think you're doing back there?</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_4">
+		<text>Lost something? Get your mitts off my gear!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_5">
+		<text>Careful where you reach, stalker.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_6">
+		<text>You could simply ask for some spare change, beggar.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_7">
+		<text>The hell you reaching into my pockets for, %player_name%?</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_8">
+		<text>People used to get their hands cut off for this, you know?</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_9">
+		<text>Keep your fucking hands to yourself, "friend".</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_10">
+		<text>I can't wait to tell the rest about you pickpocketing our guys.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_11">
+		<text>You're really trying to make yourself enemies for a few rubles, pal?</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_12">
+		<text>Wait, I know you...</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_13">
+		<text>Go ahead, fuck up a few times more. We'll make sure to spread the word around.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_14">
+		<text>Oh, dude... The Zone is that rough on you, %player_name%? Shame I'm not a fucking charity.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_15">
+		<text>I swear, we need to make our shit digital. Get bent, %player_name%.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_16">
+		<text>Motherfucker... You're really amusing. This isn't a goddamn video game, people get killed for less here, bud.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_17">
+		<text>Dude, just... get lost.</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_warn_18">
+		<text>This is my cash. Do I need to spell it out for you, dipshit?</text>
+	</string>
+	
+	
+	<string id="st_npc_pickpocket_fail_attack_1">
+		<text>Alright, fucker, you're done!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_2">
+		<text>Who- what?! Hey, get him!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_3">
+		<text>You're so fucking dead, %player_name%!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_4">
+		<text>Oh, you fucking thief!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_5">
+		<text>Of course its you, %player_name%!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_6">
+		<text>How about you now go and cry to Riisn like a little bitch you are?!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_7">
+		<text>Alright, the safe word is 'Zone brutality'!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_8">
+		<text>Stop right there, you criminal scum!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_9">
+		<text>You have committed crimes against Zone and her people and you'll pay with your blood!</text>
+	</string>
+	<string id="st_npc_pickpocket_fail_attack_10">
+		<text>I call this a difficulty tweak!</text>
+	</string>
+	
+</string_table>

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+
+<!--
+	P.A.C.K.
+-->
+
+<string_table>
+	
+	<string id="st_pack_magpouch_s_name">
+		<text>Small Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_s_desc">
+		<text>%c[0,224,224,224]A small pouch made to hold a few smaller magazines. Made for the ease of holding ammunition for longer treks or for ease of access during range days. \n \n%c[0,162,162,162]Well made pouch of standard quality.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_green] • %c[ui_gray_2] multi-stackable?: %c[ui_green]YES\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,162,162,162] basic (Tier I)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_s_up_name">
+		<text>Improved Small Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_s_up_desc">
+		<text>%c[0,224,224,224]A small pouch made to hold a few smaller magazines. Made for the ease of holding ammunition for longer treks or for ease of access during range days.\n \n %c[0,96,211,75]This one is further improved by some ballistic inserts and made to hold more magazines. Comes in tan. \n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_green] • %c[ui_gray_2] multi-stackable?: %c[ui_green]YES\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,96,211,75] upgraded (Tier II)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+
+	<string id="st_pack_magpouch_m1_name">
+		<text>Old Soviet Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_m1_desc">
+		<text>%c[0,224,224,224]Standard issue soviet era pouch, usually able to fit a standard AKM or AK-74 magazine. There’s enough space for an additional PM magazine as well. \n \n%c[0,162,162,162]Old, used and barely kept together. The cloth is wrinkled and dirty, the leather straps are stiff and crumbling.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_green] • %c[ui_gray_2] multi-stackable?: %c[ui_green]YES\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,162,162,162] basic (Tier I)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_m1_up_name">
+		<text>Soviet Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_m1_up_desc">
+		<text>%c[0,224,224,224]Standard issue soviet era pouch, usually able to fit a standard AKM or AK-74 magazine. There’s enough space for an additional PM magazine as well. \n \n%c[0,96,211,75]Surprisingly well preserved, possibly from a well locked and sealed army crate from before the Chernobyl catastrophe.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_green] • %c[ui_gray_2] multi-stackable?: %c[ui_green]YES\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,96,211,75] upgraded (Tier II)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_m1_up2_name">
+		<text>Improved Soviet Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_m1_up2_desc">
+		<text>%c[0,224,224,224]Standard issue soviet era pouch, usually able to fit a standard AKM or AK-74 magazine. There’s enough space for an additional PM magazine as well. \n \n%c[0,222,170,14]The design is well maintained, the cloth replaced by sturdier, modern fabrics and inlined by chemical-resistant inlays. The pouch was improved further to hold extra magazines.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,209,172,56] masterwork (Tier III)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+
+	<string id="st_pack_magpouch_m2_name">
+		<text>Basic Modern Double Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_m2_desc">
+		<text>%c[0,224,224,224]Typical, modern pouch system that attaches to your belt or the plate carrier. Enough space for 2 assault rifle magazines, but with enough use it can stretch to fit a smaller one too. \n \n%c[0,162,162,162]This one wasn’t kept well. It’s perfectly usable, but it is far from the perfect condition. \n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_green] • %c[ui_gray_2] multi-stackable?: %c[ui_green]YES\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,162,162,162] basic (Tier I)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_m2_up_name">
+		<text>Modern Double Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_m2_up_desc">
+		<text>%c[0,224,224,224]Typical, modern pouch system that attaches to your belt or the plate carrier. Enough space for 2 assault rifle magazines, but with enough use it can stretch to fit a smaller one too. \n \n%c[0,96,211,75]This specific pouch has the equal quality of pouches imported from the west. It’s perfectly capable of holding magazines and its base is reinforced by ballistic plates, small enough to allow freedom of movements.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_green] • %c[ui_gray_2] multi-stackable?: %c[ui_green]YES\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,96,211,75] upgraded (Tier II)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_m2_up2_name">
+		<text>Improved Modern Double Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_m2_up2_desc">
+		<text>%c[0,224,224,224]Typical, modern pouch system that attaches to your belt or the plate carrier. Enough space for 2 assault rifle magazines, but with enough use it can stretch to fit a smaller one too. \n \n%c[0,222,170,14]The design was improved by skilled technitians of the Zone, combining flexible kevlar inlays to protect its user from gunfire. Able to hold more magazines. \n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,209,172,56] masterwork (Tier III)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+
+	<string id="st_pack_magpouch_l_name">
+		<text>Basic Large Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_l_desc">
+		<text>%c[0,224,224,224]A magazine pouch made in mind with 12 gauge shotgun drums, but could fit any other ones that would be dimensionally similar. It comes with a custom top cap covers and protects the feed mechanism and flips up and away when retrieving the magazine. \n \n%c[0,162,162,162]Basic, imported design. By the quality of finish, it could be comparable to a cheap knock-off of a real military-grade pouch. Possibly inteded for airsoft.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,162,162,162] basic (Tier I)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_l_up_name">
+		<text>Large Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_l_up_desc">
+		<text>%c[0,224,224,224]A magazine pouch made in mind with 12 gauge shotgun drums, but could fit any other ones that would be dimensionally similar. It comes with a custom top cap covers and protects the feed mechanism and flips up and away when retrieving the magazine. \n \n%c[0,96,211,75]Quality product intedned for military use. Seems to be big enough to fit in an additional medium-sized magazine as well.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,96,211,75] upgraded (Tier II)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_l_up2_name">
+		<text>Improved Large Magazine Pouch</text>
+	</string>
+	<string id="st_pack_magpouch_l_up2_desc">
+		<text>%c[0,224,224,224]A magazine pouch made in mind with 12 gauge shotgun drums, but could fit any other ones that would be dimensionally similar. It comes with a custom top cap covers and protects the feed mechanism and flips up and away when retrieving the magazine. \n \n%c[0,222,170,14]Masterfully made with the best blueprints and best of resources. Its materials seem to be matching their quality of the protective uniforms of firefighters. If positioned well enough on the user’s rig, it’s able to protect the body against burns, while keeping loaded ammunition safe, protecting it from an unfortunate cook-off.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,209,172,56] masterwork (Tier III)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+
+	<string id="st_pack_magpouch_med_name">
+		<text>Basic Individual First Aid Kit</text>
+	</string>
+	<string id="st_pack_magpouch_med_desc">
+		<text>%c[0,224,224,224]IFAK is a personal medical kit issued to soldiers in service. Filled to the brim with a wide variety of pills and bandages found around the Zone to counteract open wounds of various kinds. \n \n%c[0,162,162,162]Uses an old IFAK as the pouch, filled with some basic, blood coagulants.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,162,162,162] basic (Tier I)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_med_up_name">
+		<text>Individual First Aid Kit</text>
+	</string>
+	<string id="st_pack_magpouch_med_up_desc">
+		<text>%c[0,224,224,224]IFAK is a personal medical kit issued to soldiers in service. Filled to the brim with a wide variety of pills and bandages found around the Zone to counteract open wounds of various kinds. \n \n%c[0,96,211,75]The IFAK pouch further filled with more medicine, this time also with a few radioprotectors and tourniquets.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,96,211,75] upgraded (Tier II)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_med_up2_name">
+		<text>Improved Individual First Aid Kit</text>
+	</string>
+	<string id="st_pack_magpouch_med_up2_desc">
+		<text>%c[0,224,224,224]IFAK is a personal medical kit issued to soldiers in service. Filled to the brim with a wide variety of pills and bandages found around the Zone to counteract open wounds of various kinds. \n \n%c[0,222,170,14]The IFAK pouch filled to the brim with bandages, tourniquets, antirads and various other pills that the user deemed handy, becoming a perfect addition for a true survivalist in the Zone.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,209,172,56] masterwork (Tier III)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+
+	<string id="st_pack_magpouch_cw_name">
+		<text>Basic Belt-mounted Satchel</text>
+	</string>
+	<string id="st_pack_magpouch_cw_desc">
+		<text>%c[0,224,224,224]A thigh or belt mounted pouch system that allows the user to hold a few more items without straining the back like a typical backpack would. Due to its size, it can easily fit a few magazines in a convenient place within the arm’s reach. \n \n%c[0,162,162,162]Basic bag, rather small, some compartments riddled with small tears and holes, possibly after the last user or due to lacking quality of resources used for its creation.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,162,162,162] basic (Tier I)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_cw_up_name">
+		<text>Belt-mounted Satchel</text>
+	</string>
+	<string id="st_pack_magpouch_cw_up_desc">
+		<text>%c[0,224,224,224]A thigh or belt mounted pouch system that allows the user to hold a few more items without straining the back like a typical backpack would. Due to its size, it can easily fit a few magazines in a convenient place within the arm’s reach. \n \n%c[0,96,211,75]Quality perfect for the needs of scavengers traveling through the Zone. Enough space and pouches to sort all the loot gathered up during expeditions, combined with lightweight fabrics makes for a valuable ally during long hauls.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,96,211,75] upgraded (Tier II)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+	
+	<string id="st_pack_magpouch_cw_up2_name">
+		<text>Improved Belt-mounted Satchel</text>
+	</string>
+	<string id="st_pack_magpouch_cw_up2_desc">
+		<text>%c[0,224,224,224]A thigh or belt mounted pouch system that allows the user to hold a few more items without straining the back like a typical backpack would. Due to its size, it can easily fit a few magazines in a convenient place within the arm’s reach. \n \n%c[0,222,170,14]Masterfully crafted and upgraded from the other avaliable designs already circulating the Zone. This one adorned with additional pouches on the side of the bag main bag, reinforced with some light, smaller plates for some additional protection. Extremely valuable asset, although the plates offer very little protection, serving more as a placebo and a false sense of security on top of an already impressive item.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[0,242,86,11] • %c[0,209,172,56] masterwork (Tier III)\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		</text>
+	</string>
+
+	<string id="st_pack_magpouch_anvel_name">
+		<text>Anomalous Veles Detector</text>
+	</string>
+	<string id="st_pack_magpouch_anvel_desc">
+		<text>%c[0,224,224,224]An old, broken and seemingly anomalous Veles detector, its circuitry warped and fused with traces of unknown artefact matter. \nThe device emits a faint, rhythmic hum, seemingly in tune with the background radiation of the Zone. When active, it slowly siphons residual radiation from the user’s body — a process that feels like a low electric pulse running beneath the skin. Whether a placebo or not, those who encountered this anomalous device swore that it made them feel sated, possibly due to harmonious effect of absorbing radiation and turning it into energy for the user’s body.\nHowever, this comes at a cost: the detector’s shielding has degraded, exposing the operator to increased ambient radiation levels.\n \nWhile invaluable for those frequently wandering through contaminated areas or psy-active zones, the device’s unstable radiation feedback makes prolonged use a dangerous gamble.\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] multi-stackable?: %c[ui_red]NO\n
+		%c[d_blue] • %c[ui_gray_2] valuable\n
+		%c[d_red] • %c[ui_gray_2] anomalous object\n
+		%c[d_blue] • %c[ui_gray_2] no electric power consumption\n
+		%c[0,242,86,11] • %c[0,209,172,56] P.A.C.K. - Made by: %c[0,242,86,11]R%c[0,190,68,9]i%c[0,138,49,8]i%c[0,86,31,6]s%c[0,34,13,4]n\n
+		%c[0,242,86,11] • %c[0,209,172,56] Compatch for %c[0,255,0,0]KLONDAIK:
+		\n%c[0,0,150,0] • %c[255,140,140,140] Type: %c[0,255,255,255]Synthetic
+		\n%c[0,0,150,0] • %c[255,140,140,140] Level: %c[255,120,230,130]Absolute (synthetic)
+		\n%c[0,0,150,0] • %c[255,140,140,140] Temperature: %c[255,238,153,26]Warms
+		</text>
+	</string>
+	
+</string_table>

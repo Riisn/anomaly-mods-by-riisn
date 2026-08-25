@@ -1,0 +1,69 @@
+-- Mod: Pickpocketing MCM Options Script
+-- File: ui_mcm_pickpocket.script
+
+defaults = {
+    trigger_key           = DIK_keys.DIK_V,
+    confirm_key           = DIK_keys.DIK_SPACE,
+    allow_enemies         = false,
+    loot_chance           = 25,
+    icon_alpha            = 100,
+    icon_size            = 24,
+    needle_speed          = 0.25,
+    time_factor           = 0.2,
+    base_goodwill_penalty = -20,
+    fail_window_sec       = 1800,
+    cash_min              = 150,
+    cash_max              = 500,
+    zone_size             = 30,
+    sweet_size            = 10,
+    sweet_spot_mult       = 3.0,
+    box_y                 = 250,
+}
+
+function get_config(key)
+    if ui_mcm and ui_mcm.get then
+        local val = ui_mcm.get("pickpocket/" .. key)
+        if val ~= nil then return val end
+    end
+    return defaults[key]
+end
+
+function on_mcm_load()
+    local op = {
+        id = "pickpocket",
+        sh = true,
+        gr = {
+            { id = "title", type = "slide", link = "ui_options_slider_player", text = "ui_mcm_pickpocket_title", size = { 512, 50 } },
+
+            -- Keybindings & Game Rules
+            { id = "trigger_key", type = "key_bind", val = 2, def = defaults.trigger_key },
+            { id = "confirm_key", type = "key_bind", val = 2, def = defaults.confirm_key },
+            { id = "allow_enemies", type = "check", val = 1, def = defaults.allow_enemies },
+
+            -- UI Position Dropdown
+            { id = "box_y", type = "list", val = 2, def = defaults.box_y, content = {
+                { 250, "ui_mcm_pickpocket_pos_center" },
+                { 450, "ui_mcm_pickpocket_pos_lower" }
+            } },
+            { id = "icon_alpha", type = "track", val = 2, min = 0, max = 100, step = 5, def = defaults.icon_alpha },
+            { id = "icon_size", type = "track", val = 2, min = 16, max = 64, step = 2, def = defaults.icon_size },
+
+            -- Minigame Percentages & Balance Sliders
+            { id = "zone_size", type = "track", val = 2, min = 10, max = 50, step = 1, def = defaults.zone_size },
+            { id = "sweet_size", type = "track", val = 2, min = 2, max = 20, step = 1, def = defaults.sweet_size },
+            { id = "sweet_spot_mult", type = "track", val = 2, min = 1, max = 10, step = 0.5, def = defaults.sweet_spot_mult },
+            { id = "loot_chance", type = "track", val = 2, min = 0, max = 100, step = 5, def = defaults.loot_chance },
+            
+            { id = "needle_speed", type = "track", val = 2, min = 0.1, max = 0.7, step = 0.01, def = defaults.needle_speed },
+            { id = "time_factor", type = "track", val = 2, min = 0.05, max = 1.0, step = 0.05, def = defaults.time_factor },
+
+            -- Cash & Penalties
+            { id = "cash_min", type = "track", val = 2, min = 50, max = 2000, step = 50, def = defaults.cash_min },
+            { id = "cash_max", type = "track", val = 2, min = 100, max = 5000, step = 50, def = defaults.cash_max },
+            { id = "base_goodwill_penalty", type = "track", val = 2, min = -200, max = -5, step = 5, def = defaults.base_goodwill_penalty },
+            { id = "fail_window_sec", type = "track", val = 2, min = 60, max = 3600, step = 30, def = defaults.fail_window_sec },
+        }
+    }
+
+    return op
+end

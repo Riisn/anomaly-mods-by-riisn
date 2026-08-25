@@ -1,0 +1,1241 @@
+-------------------------------------------------------------------
+-- Pickpocket HUD Helper
+--
+-- Displays a small icon above nearby stalkers while the player is
+-- crouching / slow-walking / holding ALT.
+--
+-- This is deliberately separate from mod_pickpocket_cash.script.
+-------------------------------------------------------------------
+
+local HUD = nil
+
+-------------------------------------------------------------------
+-- Configuration
+-------------------------------------------------------------------
+
+-- Replace this with the actual texture path of your icon.
+--
+-- Example:
+-- gamedata/textures/ui/pickpocket/pickpocket_hand.dds
+--
+-- becomes:
+-- "ui\\pickpocket\\pickpocket_hand"
+
+local ICON_TEXTURE =
+    "ui\\pickpocket\\pickpocket_hand"
+
+local DEFAULT_ICON_SIZE = 24
+
+---------------------------------------------------------------
+-- Pickpocket marker glow
+---------------------------------------------------------------
+
+local GLOW_TEXTURE =
+    "ui\\pickpocket\\pickpocket_hand_glow"
+
+-- Glow is slightly larger than the actual hand.
+local GLOW_SIZE_MULTIPLIER = 32 / 24
+
+-- Maximum opacity of the purple glow.
+-- Keep this fairly low so it remains unobtrusive.
+local GLOW_ALPHA = 90
+
+-- Maximum opacity of the main hand icon, controlled by MCM.
+-- This is a percentage (0-100), converted internally to X-Ray's
+-- 0-255 alpha range.
+local DEFAULT_ICON_OPACITY = 100
+
+-- How far away stalkers can receive an icon.
+local MAX_DISTANCE = 12.0
+local MAX_DISTANCE_SQR =
+    MAX_DISTANCE * MAX_DISTANCE
+
+-- How often we search for new NPCs.
+-- We do NOT scan the entire Zone every frame.
+local SCAN_INTERVAL = 0.15
+
+local ACTIVATION_DELAY = 2.0
+
+-- Fade speeds.
+local FADE_IN_TIME = 1.2
+local FADE_OUT_TIME = 1.0
+
+-- Vertical offset if the pelvis bone cannot be obtained.
+local FALLBACK_HEIGHT = 0.75
+
+-------------------------------------------------------------------
+-- Internal state
+-------------------------------------------------------------------
+
+local markers = {}
+
+local scan_timer = 0
+
+---------------------------------------------------------------
+-- Stealth activation timer
+---------------------------------------------------------------
+
+local stealth_timer = 0
+local last_update_time = time_global()
+
+-------------------------------------------------------------------
+-- Helpers
+-------------------------------------------------------------------
+
+local function GetARGB(a, r, g, b)
+
+    return
+        (math.floor(a) * 16777216)
+        + (math.floor(r) * 65536)
+        + (math.floor(g) * 256)
+        + math.floor(b)
+
+end
+
+-------------------------------------------------------------------
+-- Get the player's configured maximum icon opacity.
+--
+-- MCM stores this as 0-100 percent. The actual CUIStatic alpha
+-- remains a normal 0-255 value and is calculated when rendering.
+-------------------------------------------------------------------
+
+local function get_icon_opacity_percent()
+
+    if ui_mcm and ui_mcm.get then
+
+        local value =
+            ui_mcm.get(
+                "pickpocket/icon_alpha"
+            )
+
+        if value ~= nil then
+
+            return math.max(
+                0,
+                math.min(100, value)
+            )
+
+        end
+
+    end
+
+    return DEFAULT_ICON_OPACITY
+
+end
+
+-------------------------------------------------------------------
+-- Get the player's configured icon size.
+-- MCM stores this directly as pixels.
+-------------------------------------------------------------------
+
+local function get_icon_size()
+
+    if ui_mcm and ui_mcm.get then
+
+        local value =
+            ui_mcm.get(
+                "pickpocket/icon_size"
+            )
+
+        if value ~= nil then
+
+            return math.max(
+                16,
+                math.min(64, value)
+            )
+
+        end
+
+    end
+
+    return DEFAULT_ICON_SIZE
+
+end
+
+-------------------------------------------------------------------
+-- Is the actor currently moving sneakily?
+-------------------------------------------------------------------
+
+local function is_actor_sneaking()
+
+    if not db.actor then
+        return false
+    end
+
+    ---------------------------------------------------------------
+    -- Crouch / slow movement state
+    ---------------------------------------------------------------
+
+    local slow_state =
+        IsMoveState("mcAccel")
+        or IsMoveState("mcCrouch")
+
+    ---------------------------------------------------------------
+    -- ALT / slow-walk key
+    ---------------------------------------------------------------
+
+    local no_ui_open =
+        (
+            main_input_receiver == nil
+            or main_input_receiver() == nil
+        )
+
+    local alt_pressed = false
+
+    if no_ui_open then
+
+        alt_pressed =
+            key_state(DIK_keys.DIK_LALT) ~= 0
+            or key_state(DIK_keys.DIK_RALT) ~= 0
+            or key_state(DIK_keys.DIK_LMENU) ~= 0
+
+    end
+
+    return
+        slow_state
+        or alt_pressed
+
+end
+
+-------------------------------------------------------------------
+-- Determine whether a stalker is eligible for an icon.
+--
+-- The actual "has this NPC already been pickpocketed?" state is
+-- supplied by the main pickpocket script.
+-------------------------------------------------------------------
+
+local function can_show_marker(npc)
+
+    if not npc then
+        return false
+    end
+
+    if not db.actor then
+        return false
+    end
+
+    ---------------------------------------------------------------
+    -- iterate_nearest() can return bullets, items, etc.
+    -- Filter those out BEFORE calling NPC-specific methods.
+    ---------------------------------------------------------------
+
+    if not IsStalker(npc) then
+        return false
+    end
+
+    ---------------------------------------------------------------
+    -- Never show a marker on the player.
+    ---------------------------------------------------------------
+
+    if npc:id() == db.actor:id() then
+        return false
+    end
+
+    if not npc:alive() then
+        return false
+    end
+
+    ---------------------------------------------------------------
+    -- Distance check
+    ---------------------------------------------------------------
+
+    local dist_sqr =
+        npc:position():distance_to_sqr(
+            db.actor:position()
+        )
+
+    if dist_sqr > MAX_DISTANCE_SQR then
+        return false
+    end
+
+    ---------------------------------------------------------------
+    -- Ask the main pickpocket script whether this NPC is valid.
+    ---------------------------------------------------------------
+
+    if mod_pickpocket_cash
+        and mod_pickpocket_cash.can_show_pickpocket_marker then
+
+        local ok, result =
+            pcall(
+                mod_pickpocket_cash.can_show_pickpocket_marker,
+                npc
+            )
+
+        if not ok then
+            return false
+        end
+
+        return result == true
+    end
+
+    return false
+end
+
+-------------------------------------------------------------------
+-- Get the NPC pelvis position.
+-------------------------------------------------------------------
+
+local function get_marker_world_position(npc)
+
+    ---------------------------------------------------------------
+    -- Try the pelvis bone first.
+    ---------------------------------------------------------------
+
+    local ok, pos =
+        pcall(
+            function()
+
+                return npc:bone_position(
+                    "bip01_pelvis"
+                )
+
+            end
+        )
+
+    if ok and pos then
+
+        return pos
+
+    end
+
+    ---------------------------------------------------------------
+    -- Some models / engine combinations may not expose the
+    -- requested bone. Fall back to the NPC world position.
+    ---------------------------------------------------------------
+
+    local fallback =
+        npc:position()
+
+    fallback.y =
+        fallback.y + FALLBACK_HEIGHT
+
+    return fallback
+
+end
+
+-------------------------------------------------------------------
+-- Check whether the NPC's marker position is visible from the
+-- player's camera.
+--
+-- This prevents the HUD marker from rendering through walls,
+-- buildings, doors, and other blocking geometry/objects.
+-------------------------------------------------------------------
+
+local function has_line_of_sight_to_marker(npc, world_pos)
+
+    if not (db.actor and npc and world_pos) then
+        return false
+    end
+
+    local cam_pos =
+        device().cam_pos
+
+    if not cam_pos then
+        return false
+    end
+
+    local to_target =
+        vector():set(
+            world_pos.x - cam_pos.x,
+            world_pos.y - cam_pos.y,
+            world_pos.z - cam_pos.z
+        )
+
+    local distance_sqr =
+        (to_target.x * to_target.x)
+        + (to_target.y * to_target.y)
+        + (to_target.z * to_target.z)
+
+    if distance_sqr <= 0.0001 then
+        return true
+    end
+
+    local distance =
+        math.sqrt(distance_sqr)
+
+    local direction =
+        vector():set(
+            to_target.x / distance,
+            to_target.y / distance,
+            to_target.z / distance
+        )
+
+    ---------------------------------------------------------------
+    -- Trace both game objects and static geometry.
+    --
+    -- The target NPC is passed as the object to ignore only for
+    -- the initial ray construction would be wrong here, because
+    -- we NEED the ray to be able to hit the target NPC.
+    -- Therefore we only ignore the player.
+    ---------------------------------------------------------------
+
+    local ray =
+        ray_pick(
+            cam_pos,
+            direction,
+            distance + 0.05,
+            rq_target.rqtObject + rq_target.rqtStatic,
+            db.actor
+        )
+
+    local ok, hit =
+        pcall(
+            function()
+                return ray:query()
+            end
+        )
+
+    if not ok or not hit then
+        return false
+    end
+
+    local hit_object =
+        ray:get_object()
+
+    ---------------------------------------------------------------
+    -- The first object hit is the target NPC: clear line of sight.
+    ---------------------------------------------------------------
+
+    if hit_object
+        and hit_object:id() == npc:id() then
+
+        return true
+
+    end
+
+    ---------------------------------------------------------------
+    -- Anything else was hit first. Treat it as an obstruction.
+    ---------------------------------------------------------------
+
+    return false
+
+end
+
+-------------------------------------------------------------------
+-- Create a marker.
+-------------------------------------------------------------------
+
+local function create_marker(npc)
+
+    if not npc then
+        return nil
+    end
+
+    local id =
+        npc:id()
+
+    if markers[id] then
+        return markers[id]
+    end
+
+    ---------------------------------------------------------------
+    -- Read the configured size before creating either UI element.
+    ---------------------------------------------------------------
+
+    local icon_size =
+        get_icon_size()
+
+    local glow_size =
+        math.floor(
+            icon_size * GLOW_SIZE_MULTIPLIER
+        )
+
+    ---------------------------------------------------------------
+    -- Glow
+    ---------------------------------------------------------------
+
+    local glow =
+        CUIStatic()
+
+    glow:SetAutoDelete(true)
+
+    glow:SetWndSize(
+        vector2():set(
+            glow_size,
+            glow_size
+        )
+    )
+
+    glow:InitTexture(
+        GLOW_TEXTURE
+    )
+
+    glow:SetStretchTexture(true)
+
+    glow:SetTextureColor(
+        GetARGB(
+            0,
+            150,
+            80,
+            190
+        )
+    )
+
+    glow:Show(true)
+
+    HUD:AttachChild(glow)
+
+    ---------------------------------------------------------------
+    -- Actual hand icon
+    ---------------------------------------------------------------
+
+    local marker =
+        CUIStatic()
+
+    marker:SetAutoDelete(true)
+
+    marker:SetWndSize(
+        vector2():set(
+            icon_size,
+            icon_size
+        )
+    )
+
+    marker:InitTexture(
+        ICON_TEXTURE
+    )
+
+    marker:SetStretchTexture(true)
+
+    marker:SetTextureColor(
+        GetARGB(
+            0,
+            255,
+            255,
+            255
+        )
+    )
+
+    marker:Show(true)
+
+    HUD:AttachChild(marker)
+
+    ---------------------------------------------------------------
+    -- Marker data
+    ---------------------------------------------------------------
+
+    local data = {
+        npc = npc,
+
+        icon = marker,
+        glow = glow,
+        icon_size = icon_size,
+        glow_size = glow_size,
+
+        alpha = 0,
+        target_alpha = 0,
+        wanted = false,
+    }
+
+    markers[id] = data
+
+    return data
+
+end
+
+-------------------------------------------------------------------
+-- Remove a marker.
+-------------------------------------------------------------------
+
+local function remove_marker(id)
+
+    local data =
+        markers[id]
+
+    if not data then
+        return
+    end
+
+    if data.icon then
+
+        pcall(
+            function()
+                HUD:DetachChild(
+                    data.icon,
+                    true
+                )
+            end
+        )
+
+    end
+
+    if data.glow then
+
+        pcall(
+            function()
+                HUD:DetachChild(
+                    data.glow,
+                    true
+                )
+            end
+        )
+
+    end
+
+    markers[id] = nil
+
+end
+
+-------------------------------------------------------------------
+-- Update marker alpha.
+-------------------------------------------------------------------
+
+local function update_alpha(data, dt)
+
+    local alpha =
+        data.alpha
+
+    local target =
+        data.target_alpha
+
+    if alpha < target then
+
+        alpha =
+    math.min(
+        target,
+        alpha
+            + (
+                255
+                * dt
+                / FADE_IN_TIME
+            )
+    )
+
+    elseif alpha > target then
+
+        alpha =
+    math.max(
+        target,
+        alpha
+            - (
+                255
+                * dt
+                / FADE_OUT_TIME
+            )
+    )
+
+    end
+
+    data.alpha =
+        alpha
+
+    -----------------------------------------------------------
+-- Apply alpha to the hand.
+-----------------------------------------------------------
+
+if data.icon then
+
+    data.icon:SetTextureColor(
+        GetARGB(
+            alpha,
+            255,
+            255,
+            255
+        )
+    )
+
+end
+
+-----------------------------------------------------------
+-- Apply proportional alpha to the purple glow.
+-----------------------------------------------------------
+
+if data.glow then
+
+    local glow_alpha =
+        math.floor(
+            GLOW_ALPHA
+            * (alpha / 255)
+        )
+
+    data.glow:SetTextureColor(
+        GetARGB(
+            glow_alpha,
+            150,
+            80,
+            190
+        )
+    )
+
+end
+
+end
+
+-------------------------------------------------------------------
+-- Update marker position.
+-------------------------------------------------------------------
+
+local function update_marker_position(data)
+
+    local npc =
+        data.npc
+
+    if not npc
+        or not npc:alive() then
+
+        data.target_alpha = 0
+        return
+    end
+
+    ---------------------------------------------------------------
+    -- Get the NPC's pelvis position.
+    --
+    -- safe_bone_pos() is preferable here because it safely handles
+    -- NPC bone access and is already used by existing Anomaly HUD
+    -- marker implementations.
+    ---------------------------------------------------------------
+
+    local world_pos =
+        utils_obj.safe_bone_pos(
+            npc,
+            "bip01_pelvis"
+        )
+
+    ---------------------------------------------------------------
+    -- Fallback if the pelvis cannot be obtained.
+    ---------------------------------------------------------------
+
+    if not world_pos then
+
+        world_pos =
+            npc:position()
+
+        world_pos.y =
+            world_pos.y + FALLBACK_HEIGHT
+
+    end
+
+    if not world_pos then
+
+        data.target_alpha = 0
+        return
+
+    end
+
+    ---------------------------------------------------------------
+    -- Do not allow the marker to see through walls or other
+    -- blocking objects.
+    --
+    -- We perform this every frame so the marker smoothly fades out
+    -- as soon as the player moves behind cover, and fades back in
+    -- once the NPC becomes visible again.
+    ---------------------------------------------------------------
+
+    if not has_line_of_sight_to_marker(
+        npc,
+        world_pos
+    ) then
+
+        data.target_alpha = 0
+
+    elseif data.wanted then
+
+        data.target_alpha = 255
+
+    end
+
+    ---------------------------------------------------------------
+    -- Convert WORLD coordinates into SCREEN/UI coordinates.
+    --
+    -- IMPORTANT:
+    -- FALSE is intentional here.
+    --
+    -- The resulting vector is directly suitable for
+    -- CUIStatic:SetWndPos().
+    ---------------------------------------------------------------
+
+    local ui_pos =
+        game.world2ui(
+            vector():set(
+                world_pos.x,
+                world_pos.y,
+                world_pos.z
+            ),
+            false
+        )
+
+    if not ui_pos then
+
+        data.target_alpha = 0
+        return
+
+    end
+
+    ---------------------------------------------------------------
+    -- Off-screen protection.
+    --
+    -- world2ui() can return -9999 for positions outside the
+    -- visible screen.
+    ---------------------------------------------------------------
+
+    if ui_pos.x == -9999
+        or ui_pos.y == -9999 then
+
+        data.target_alpha = 0
+        return
+
+    end
+
+    ---------------------------------------------------------------
+    -- Put the center of the icon on the pelvis.
+    ---------------------------------------------------------------
+
+    data.icon:SetWndPos(
+        vector2():set(
+            ui_pos.x - (data.icon_size / 2),
+            ui_pos.y - (data.icon_size / 2)
+        )
+    )
+
+    data.glow:SetWndPos(
+        vector2():set(
+            ui_pos.x - (data.glow_size / 2),
+            ui_pos.y - (data.glow_size / 2)
+        )
+    )
+
+end
+
+-------------------------------------------------------------------
+-- Scan for nearby stalkers.
+-------------------------------------------------------------------
+
+local function scan_for_targets()
+
+    if not db.actor then
+        return
+    end
+
+    ---------------------------------------------------------------
+    -- First mark every existing marker as unwanted.
+    ---------------------------------------------------------------
+
+    local wanted =
+        {}
+
+    ---------------------------------------------------------------
+    -- Search nearby objects.
+    --
+    -- iterate_nearest() is used instead of scanning every object
+    -- in the Zone.
+    ---------------------------------------------------------------
+
+    level.iterate_nearest(
+        db.actor:position(),
+        MAX_DISTANCE,
+        function(npc)
+
+            if can_show_marker(npc) then
+
+                local id =
+                    npc:id()
+
+                wanted[id] =
+                    true
+
+                local marker =
+                    create_marker(npc)
+
+                if marker then
+
+                    marker.npc =
+                        npc
+
+                    marker.wanted =
+                        true
+
+                    local world_pos =
+                        get_marker_world_position(npc)
+
+                    if world_pos
+                        and has_line_of_sight_to_marker(
+                            npc,
+                            world_pos
+                        ) then
+
+                        marker.target_alpha =
+                            255
+
+                    else
+
+                        marker.target_alpha =
+                            0
+
+                    end
+
+                end
+
+            end
+
+            return false
+
+        end
+    )
+
+    ---------------------------------------------------------------
+    -- Anything not found during this scan should fade out.
+    ---------------------------------------------------------------
+
+    for id, data in pairs(markers) do
+
+        if not wanted[id] then
+
+            data.target_alpha = 0
+            data.wanted = false
+
+        end
+
+    end
+
+end
+
+-------------------------------------------------------------------
+-- HUD class
+-------------------------------------------------------------------
+
+class "PickpocketHUD" (CUIScriptWnd)
+
+function PickpocketHUD:__init() super()
+
+    self:SetWndRect(
+        Frect():set(
+            0,
+            0,
+            1024,
+            768
+        )
+    )
+
+end
+
+function PickpocketHUD:Update()
+
+    CUIScriptWnd.Update(self)
+
+    if not db.actor then
+        return
+    end
+
+    ---------------------------------------------------------------
+    -- Calculate real frame time.
+    ---------------------------------------------------------------
+
+    local now =
+        time_global()
+
+    local dt =
+        (now - last_update_time) / 1000
+
+    last_update_time =
+        now
+
+    -- Protect against huge values after pauses/loading.
+    if dt < 0 then
+        dt = 0
+    end
+
+    if dt > 0.1 then
+        dt = 0.1
+    end
+
+    ---------------------------------------------------------------
+    -- Determine whether the player is currently sneaking.
+    --
+    -- IMPORTANT:
+    -- We are deliberately NOT changing the input behavior here.
+    -- LALT and crouching remain the activation conditions.
+    ---------------------------------------------------------------
+
+    local sneaking =
+        is_actor_sneaking()
+
+    ---------------------------------------------------------------
+    -- Build the activation timer.
+    ---------------------------------------------------------------
+
+    if sneaking then
+
+        stealth_timer =
+            math.min(
+                ACTIVATION_DELAY,
+                stealth_timer + dt
+            )
+
+    else
+
+        stealth_timer =
+            0
+
+        -----------------------------------------------------------
+        -- Immediately begin fading markers out.
+        -----------------------------------------------------------
+
+        for _, data in pairs(markers) do
+
+            data.target_alpha =
+                0
+
+        end
+
+    end
+
+    ---------------------------------------------------------------
+    -- Are we sufficiently committed to stealth?
+    ---------------------------------------------------------------
+
+    local stealth_active =
+        stealth_timer >= ACTIVATION_DELAY
+
+    if stealth_active then
+
+        scan_timer =
+            scan_timer - dt
+
+        if scan_timer <= 0 then
+
+            scan_timer =
+                SCAN_INTERVAL
+
+            scan_for_targets()
+
+        end
+
+    end
+
+    ---------------------------------------------------------------
+    -- Update every existing marker.
+    ---------------------------------------------------------------
+
+    for id, data in pairs(markers) do
+
+        -----------------------------------------------------------
+        -- Fade speed.
+        -----------------------------------------------------------
+
+        local target =
+            data.target_alpha
+
+        local alpha =
+            data.alpha
+
+        if target > alpha then
+
+            alpha =
+                math.min(
+                    target,
+                    alpha
+                        + (
+                            255
+                            * dt
+                            / FADE_IN_TIME
+                        )
+                )
+
+        elseif target < alpha then
+
+            alpha =
+                math.max(
+                    target,
+                    alpha
+                        - (
+                            255
+                            * dt
+                            / FADE_OUT_TIME
+                        )
+                )
+
+        end
+
+        data.alpha =
+            alpha
+
+        -----------------------------------------------------------
+        -- Apply alpha.
+        -----------------------------------------------------------
+
+        if data.icon then
+
+            -------------------------------------------------------
+            -- Scale the normal fade alpha by the player's MCM
+            -- opacity setting.
+            --
+            -- The fade system still runs from 0-255 internally;
+            -- this only changes the final rendered opacity.
+            -------------------------------------------------------
+
+            local opacity_percent =
+                get_icon_opacity_percent()
+
+            local max_icon_alpha =
+                math.floor(
+                    255 * (opacity_percent / 100)
+                )
+
+            local final_icon_alpha =
+                math.floor(
+                    max_icon_alpha
+                    * (alpha / 255)
+                )
+
+            data.icon:SetTextureColor(
+                GetARGB(
+                    final_icon_alpha,
+                    255,
+                    255,
+                    255
+                )
+            )
+
+        end
+
+        -----------------------------------------------------------
+        -- Keep the icon attached to the NPC every frame.
+        --
+        -- This happens even while fading.
+        -----------------------------------------------------------
+
+        if alpha > 0 then
+
+            update_marker_position(
+                data
+            )
+
+        end
+
+        -----------------------------------------------------------
+        -- Delete completely invisible markers.
+        -----------------------------------------------------------
+
+        if alpha <= 0
+            and target <= 0 then
+
+            remove_marker(id)
+
+        end
+
+    end
+
+end
+
+-------------------------------------------------------------------
+-- HUD creation
+-------------------------------------------------------------------
+
+local function show_hud()
+
+    if HUD then
+        return
+    end
+
+    local ok, hud =
+        pcall(
+            function()
+                return PickpocketHUD()
+            end
+        )
+
+    if not ok or not hud then
+
+        printf(
+            "[PICKPOCKET HUD] Failed to create HUD: %s",
+            tostring(hud)
+        )
+
+        return
+
+    end
+
+    HUD =
+        hud
+
+    get_hud():AddDialogToRender(
+        HUD
+    )
+
+end
+
+-------------------------------------------------------------------
+-- HUD cleanup
+-------------------------------------------------------------------
+
+local function close_hud()
+
+    if not HUD then
+        return
+    end
+
+    for id, data in pairs(markers) do
+
+        if data.icon then
+
+            pcall(
+                function()
+
+                    HUD:DetachChild(
+                        data.icon,
+                        true
+                    )
+
+                end
+            )
+
+        end
+
+        if data.glow then
+
+            pcall(
+                function()
+
+                    HUD:DetachChild(
+                        data.glow,
+                        true
+                    )
+
+                end
+            )
+
+        end
+
+    end
+
+    markers = {}
+
+    pcall(
+        function()
+
+            get_hud():RemoveDialogToRender(
+                HUD
+            )
+
+        end
+    )
+
+    HUD = nil
+
+end
+
+-------------------------------------------------------------------
+-- Callbacks
+-------------------------------------------------------------------
+
+function on_game_start()
+
+    ---------------------------------------------------------------
+    -- Start the HUD after the actor exists.
+    ---------------------------------------------------------------
+
+    RegisterScriptCallback(
+        "actor_on_first_update",
+        show_hud
+    )
+
+    ---------------------------------------------------------------
+    -- Destroy the HUD when the actor is removed / level changes.
+    ---------------------------------------------------------------
+
+    RegisterScriptCallback(
+        "actor_on_net_destroy",
+        close_hud
+    )
+
+end

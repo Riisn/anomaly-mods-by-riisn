@@ -1,0 +1,74 @@
+[
+    {
+    "id": "actors\\mnp_npc_remeik\\bandit_trader_td",
+    "visual_item_id": "stalker_outfit",
+    "hit_fraction": 0.5,
+    "ap_scale": 0.8,
+    "body_bonearmor": 0.1,
+    "head_bonearmor": 0
+    },
+    {
+    "id": "actors\\stalker_soldier\\stalker_soldier_1_helm_tactic_nogas",
+    "visual_item_id": "army_outfit,helm_tactic",
+    "hit_fraction": 0.6,
+    "ap_scale": 0.85,
+    "body_bonearmor": 0.075,
+    "head_bonearmor": 0.2
+    },
+    {
+    "id": "actors\\stalker_nebo\\stalker_nebo_r1_goggles_steel_helm_pbf",
+    "visual_item_id": "cs_novice_outfit,helm_ach7ex",
+    "hit_fraction": 0.9,
+    "ap_scale": 0.9,
+    "body_bonearmor": 0.011,
+    "head_bonearmor": 0.3
+  },
+    {
+    "id": "actors\\stalker_nebo\\stalker_cs1_darker_gp5",
+    "visual_item_id": "cs_light_novice_outfit,helm_respirator_gp5",
+    "hit_fraction": 0.5,
+    "ap_scale": 0.75,
+    "body_bonearmor": 0.1,
+    "head_bonearmor": 0.2
+    },
+    {
+    "id": "actors\\stalker_nebo\\stalker_nebo3a",
+    "visual_item_id": "cs_light_outfit",
+    "hit_fraction": 0.4,
+    "ap_scale": 0.8,
+    "body_bonearmor": 0.125,
+    "head_bonearmor": 0.2
+    },
+    {
+    "id": "actors\\izgoy\\izgoy",
+    "visual_item_id": "exo_outfit,helm_exo",
+    "hit_fraction": 0.15,
+    "ap_scale": 0.7,
+    "body_bonearmor": 0.55,
+    "head_bonearmor": 0.3
+    },
+    {
+    "id": "actors\\stalker_greh\\stalker_greh_exolight_with_powered_arm",
+    "visual_item_id": "hybrid_outfit",
+    "hit_fraction": 0.2,
+    "ap_scale": 0.75,
+    "body_bonearmor": 0.4,
+    "head_bonearmor": 0
+    },
+    {
+    "id": "actors\\stalker_bandit\\stalker_bandit_nosorog_mk2",
+    "visual_item_id": "bandit_exo_outfit,helm_spartan",
+    "hit_fraction": 0.15,
+    "ap_scale": 0.7,
+    "body_bonearmor": 0.65,
+    "head_bonearmor": 0.35
+    },
+    {
+    "id": "actors\\stalker_freedom\\stalker_freedom_2_face_2",
+    "visual_item_id": "svoboda_exo_outfit,helm_exo",
+    "hit_fraction": 0.15,
+    "ap_scale": 0.7,
+    "body_bonearmor": 0.43,
+    "head_bonearmor": 0.3
+    }
+]
